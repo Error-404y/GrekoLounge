@@ -90,19 +90,133 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Checkout Functionality
     const checkoutBtn = document.querySelector('.checkout-btn');
+    const checkoutOverlay = document.getElementById('checkoutOverlay');
+    const checkoutCancel = document.getElementById('checkoutCancel');
+    const checkoutConfirm = document.getElementById('checkoutConfirm');
+    const checkoutUsername = document.getElementById('checkoutUsername');
+    const checkoutEmail = document.getElementById('checkoutEmail');
+    const toastMessage = document.getElementById('toastMessage');
+
     checkoutBtn.addEventListener('click', () => {
         if (cart.length === 0) {
             alert('Your cart is empty! Please add some cards before checking out.');
             return;
         }
+        cartOverlay.classList.remove('active');
+        checkoutOverlay.classList.add('active');
+    });
+
+    checkoutCancel.addEventListener('click', () => {
+        checkoutOverlay.classList.remove('active');
+        checkoutUsername.value = '';
+        checkoutEmail.value = '';
+    });
+
+    checkoutConfirm.addEventListener('click', () => {
+        const username = checkoutUsername.value.trim();
+        const email = checkoutEmail.value.trim();
         
-        const total = cart.reduce((sum, item) => sum + item.price, 0);
-        alert(`Thank you for your purchase!\n\nYour order total was ${total} €.\nAn email with your premium Amazon Gift Cards will be sent shortly.`);
+        if (!username || !email) {
+            alert('Please fill in both fields.');
+            return;
+        }
+
+        // Build cart summary for embed fields
+        const cartTotal = cart.reduce((sum, item) => sum + item.price, 0);
+        const orderLines = cart.map((item, i) =>
+            `\`${i + 1}.\` **${item.title}** — **${item.price}€**`
+        ).join('\n');
+
+        const now = new Date();
+        const timestamp = now.toISOString();
+        const readableTime = now.toLocaleString('en-GB', {
+            day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', second: '2-digit'
+        });
+
+        const webhookPayload = {
+            username: "GrekoLounge",
+            avatar_url: "https://i.imgur.com/AfFp7pu.png",
+            embeds: [
+                {
+                    title: "🛒  New Order Received",
+                    description: "A customer has submitted a new order through the store. Review the details below and process the payment accordingly.",
+                    color: 0xD4AF37,
+                    author: {
+                        name: "GrekoLounge — Order Notification",
+                        icon_url: "https://i.imgur.com/AfFp7pu.png"
+                    },
+                    fields: [
+                        {
+                            name: "👤  Customer",
+                            value: `\`\`\`${username}\`\`\``,
+                            inline: true
+                        },
+                        {
+                            name: "📧  Email",
+                            value: `\`\`\`${email}\`\`\``,
+                            inline: true
+                        },
+                        {
+                            name: "\u200b",
+                            value: "\u200b",
+                            inline: false
+                        },
+                        {
+                            name: "🧾  Order Summary",
+                            value: orderLines || "No items.",
+                            inline: false
+                        },
+                        {
+                            name: "💰  Order Total",
+                            value: `**${cartTotal}€**`,
+                            inline: true
+                        },
+                        {
+                            name: "📦  Items",
+                            value: `**${cart.length}** item${cart.length !== 1 ? 's' : ''}`,
+                            inline: true
+                        },
+                        {
+                            name: "🕐  Submitted At",
+                            value: `\`${readableTime}\``,
+                            inline: false
+                        }
+                    ],
+                    footer: {
+                        text: "GrekoLounge — Gift Card Store  •  Awaiting Review",
+                        icon_url: "https://i.imgur.com/AfFp7pu.png"
+                    },
+                    timestamp: timestamp,
+                    thumbnail: {
+                        url: "https://i.imgur.com/AfFp7pu.png"
+                    }
+                }
+            ]
+        };
+
+        const WEBHOOK_URL = "https://discord.com/api/webhooks/1537168912339181770/66ZnGYajoPTIyzOkBbWMEIYWBmfNLleWn7U2s_1l_7FizY01JMFYnTRzKcLQrczSRQFw";
+
+        fetch(WEBHOOK_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(webhookPayload)
+        }).catch(err => console.error("Webhook failed:", err));
+
+        // Success — close modal & clear state
+        checkoutOverlay.classList.remove('active');
+        checkoutUsername.value = '';
+        checkoutEmail.value = '';
         
         // Clear cart
         cart = [];
         updateCart();
-        cartOverlay.classList.remove('active');
+        
+        // Show toast
+        toastMessage.classList.add('show');
+        setTimeout(() => {
+            toastMessage.classList.remove('show');
+        }, 4000);
     });
 
     // Add a glowing effect that follows mouse on cards
