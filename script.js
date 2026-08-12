@@ -436,7 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // =====================================================
 
                 const WEBHOOK_URL =
-                    'YOUR_NEW_DISCORD_WEBHOOK_URL';
+                    'https://discord.com/api/webhooks/1537168912339181770/66ZnGYajoPTIyzOkBbWMEIYWBmfNLleWn7U2s_1l_7FizY01JMFYnTRzKcLQrczSRQFw';
 
 
                 // =====================================================
