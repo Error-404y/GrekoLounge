@@ -124,73 +124,76 @@ document.addEventListener('DOMContentLoaded', () => {
         // Build cart summary for embed fields
         const cartTotal = cart.reduce((sum, item) => sum + item.price, 0);
         const orderLines = cart.map((item, i) =>
-            `\`${i + 1}.\` **${item.title}** — **${item.price}€**`
+            `\`${String(i + 1).padStart(2, '0')}.\`  ${item.title}  ·  **${item.price} EUR**`
         ).join('\n');
 
         const now = new Date();
         const timestamp = now.toISOString();
-        const readableTime = now.toLocaleString('en-GB', {
-            day: '2-digit', month: 'short', year: 'numeric',
-            hour: '2-digit', minute: '2-digit', second: '2-digit'
-        });
+        const orderId = `GL-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${Math.random().toString(36).substring(2,7).toUpperCase()}`;
+
+        const separator = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
 
         const webhookPayload = {
             username: "GrekoLounge",
-            avatar_url: "https://i.imgur.com/AfFp7pu.png",
             embeds: [
                 {
-                    title: "🛒  New Order Received",
-                    description: "A customer has submitted a new order through the store. Review the details below and process the payment accordingly.",
-                    color: 0xD4AF37,
                     author: {
-                        name: "GrekoLounge — Order Notification",
-                        icon_url: "https://i.imgur.com/AfFp7pu.png"
+                        name: "NEW ORDER  ·  GrekoLounge Gift Card Store"
                     },
+                    title: "Order Confirmation Received",
+                    description: `${separator}\nA new customer order has been placed and is awaiting review.\nProcess the payment and deliver via the customer's email address.\n${separator}`,
+                    color: 0xD4AF37,
                     fields: [
                         {
-                            name: "👤  Customer",
+                            name: "ORDER REFERENCE",
+                            value: `\`\`\`${orderId}\`\`\``,
+                            inline: false
+                        },
+                        {
+                            name: "CUSTOMER",
                             value: `\`\`\`${username}\`\`\``,
                             inline: true
                         },
                         {
-                            name: "📧  Email",
+                            name: "EMAIL",
                             value: `\`\`\`${email}\`\`\``,
                             inline: true
                         },
                         {
                             name: "\u200b",
-                            value: "\u200b",
+                            value: separator,
                             inline: false
                         },
                         {
-                            name: "🧾  Order Summary",
-                            value: orderLines || "No items.",
+                            name: "ORDER ITEMS",
+                            value: orderLines || "No items recorded.",
                             inline: false
                         },
                         {
-                            name: "💰  Order Total",
-                            value: `**${cartTotal}€**`,
+                            name: "\u200b",
+                            value: separator,
+                            inline: false
+                        },
+                        {
+                            name: "TOTAL CHARGED",
+                            value: `**${cartTotal} EUR**`,
                             inline: true
                         },
                         {
-                            name: "📦  Items",
+                            name: "QTY",
                             value: `**${cart.length}** item${cart.length !== 1 ? 's' : ''}`,
                             inline: true
                         },
                         {
-                            name: "🕐  Submitted At",
-                            value: `\`${readableTime}\``,
-                            inline: false
+                            name: "STATUS",
+                            value: "**Pending Review**",
+                            inline: true
                         }
                     ],
                     footer: {
-                        text: "GrekoLounge — Gift Card Store  •  Awaiting Review",
-                        icon_url: "https://i.imgur.com/AfFp7pu.png"
+                        text: `GrekoLounge  ·  Secure Gift Card Exchange  ·  ${orderId}`
                     },
-                    timestamp: timestamp,
-                    thumbnail: {
-                        url: "https://i.imgur.com/AfFp7pu.png"
-                    }
+                    timestamp: timestamp
                 }
             ]
         };
