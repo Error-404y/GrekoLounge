@@ -121,34 +121,82 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Build cart summary for embed fields
+        // ── Build order data ──────────────────────────────────────────────────
         const cartTotal = cart.reduce((sum, item) => sum + item.price, 0);
-        const orderLines = cart.map((item, i) =>
-            `\`${String(i + 1).padStart(2, '0')}.\`  ${item.title}  ·  **${item.price} EUR**`
-        ).join('\n');
-
-        const now = new Date();
+        const now       = new Date();
         const timestamp = now.toISOString();
-        const orderId = `GL-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${Math.random().toString(36).substring(2,7).toUpperCase()}`;
+        const orderId   = `GL-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${Math.random().toString(36).substring(2,7).toUpperCase()}`;
 
-        const separator = '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
+        const pad = (str, len) => String(str).padEnd(len);
+        const W = 44; // receipt width (chars inside the box)
 
+        // ── Receipt-style code block ──────────────────────────────────────────
+        const receiptLines = [
+            '╔' + '═'.repeat(W) + '╗',
+            '║' + pad('', W) + '║',
+            '║' + pad('  G R E K O L O U N G E', W) + '║',
+            '║' + pad('  Secure Gift Card Exchange', W) + '║',
+            '║' + pad('', W) + '║',
+            '╠' + '═'.repeat(W) + '╣',
+            '║' + pad('', W) + '║',
+            '║' + pad(`  REF      ${orderId}`, W) + '║',
+            '║' + pad(`  STATUS   Pending Review`, W) + '║',
+            '║' + pad('', W) + '║',
+            '╠' + '─'.repeat(W) + '╣',
+            '║' + pad('', W) + '║',
+            '║' + pad('  CUSTOMER INFORMATION', W) + '║',
+            '║' + pad('', W) + '║',
+            '║' + pad(`  Name     ${username}`, W) + '║',
+            '║' + pad(`  Email    ${email}`, W) + '║',
+            '║' + pad('', W) + '║',
+            '╠' + '─'.repeat(W) + '╣',
+            '║' + pad('', W) + '║',
+            '║' + pad('  ORDER ITEMS', W) + '║',
+            '║' + pad('', W) + '║',
+            ...cart.map((item, i) => {
+                const num   = `  ${String(i+1).padStart(2,'0')}.  `;
+                const price = `${item.price} EUR`;
+                const name  = item.title.substring(0, W - num.length - price.length - 2);
+                const gap   = W - num.length - name.length - price.length;
+                return '║' + num + name + ' '.repeat(gap) + price + '║';
+            }),
+            '║' + pad('', W) + '║',
+            '╠' + '─'.repeat(W) + '╣',
+            '║' + pad('', W) + '║',
+            '║' + (() => {
+                const label = '  TOTAL';
+                const val   = `${cartTotal} EUR  `;
+                const gap   = W - label.length - val.length;
+                return label + ' '.repeat(gap) + val;
+            })() + '║',
+            '║' + pad('', W) + '║',
+            '╚' + '═'.repeat(W) + '╝',
+        ];
+
+        const receiptBlock = '```\n' + receiptLines.join('\n') + '\n```';
+
+        // ── Webhook payload ───────────────────────────────────────────────────
         const webhookPayload = {
             username: "GrekoLounge",
             embeds: [
                 {
-                    author: {
-                        name: "NEW ORDER  ·  GrekoLounge Gift Card Store"
-                    },
-                    title: "Order Confirmation Received",
-                    description: `${separator}\nA new customer order has been placed and is awaiting review.\nProcess the payment and deliver via the customer's email address.\n${separator}`,
+                    // ── Embed 1 — Header ───────────────────────────────────────
                     color: 0xD4AF37,
+                    author: {
+                        name: "GREKOLOUNGE  ·  ORDER MANAGEMENT SYSTEM"
+                    },
+                    title: "New Order Received",
+                    description: receiptBlock,
+                    timestamp: timestamp,
+                    footer: {
+                        text: `Order ID ${orderId}  ·  Awaiting Review  ·  GrekoLounge`
+                    }
+                },
+                {
+                    // ── Embed 2 — Quick Summary Panel ──────────────────────────
+                    color: 0x1C1C2E,
+                    description: `**QUICK SUMMARY**\n${'─'.repeat(34)}`,
                     fields: [
-                        {
-                            name: "ORDER REFERENCE",
-                            value: `\`\`\`${orderId}\`\`\``,
-                            inline: false
-                        },
                         {
                             name: "CUSTOMER",
                             value: `\`\`\`${username}\`\`\``,
@@ -160,38 +208,28 @@ document.addEventListener('DOMContentLoaded', () => {
                             inline: true
                         },
                         {
-                            name: "\u200b",
-                            value: separator,
-                            inline: false
-                        },
-                        {
-                            name: "ORDER ITEMS",
-                            value: orderLines || "No items recorded.",
-                            inline: false
-                        },
-                        {
-                            name: "\u200b",
-                            value: separator,
-                            inline: false
-                        },
-                        {
-                            name: "TOTAL CHARGED",
-                            value: `**${cartTotal} EUR**`,
+                            name: "ORDER TOTAL",
+                            value: `\`\`\`${cartTotal} EUR\`\`\``,
                             inline: true
                         },
                         {
-                            name: "QTY",
-                            value: `**${cart.length}** item${cart.length !== 1 ? 's' : ''}`,
+                            name: "ITEMS ORDERED",
+                            value: `\`\`\`${cart.length} item${cart.length !== 1 ? 's' : ''}\`\`\``,
+                            inline: true
+                        },
+                        {
+                            name: "ORDER REFERENCE",
+                            value: `\`\`\`${orderId}\`\`\``,
                             inline: true
                         },
                         {
                             name: "STATUS",
-                            value: "**Pending Review**",
+                            value: `\`\`\`Pending Review\`\`\``,
                             inline: true
                         }
                     ],
                     footer: {
-                        text: `GrekoLounge  ·  Secure Gift Card Exchange  ·  ${orderId}`
+                        text: `Submitted via GrekoLounge Store  ·  Review and process within 24h`
                     },
                     timestamp: timestamp
                 }
