@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GrekoLounge — Order Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #07070f;
+            color: #ddddf0;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 3rem 1.5rem;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 40% at 15% 10%, rgba(212,175,55,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 85% 90%, rgba(212,175,55,0.04) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .panel {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 700px;
+            background: rgba(255,255,255,0.025);
+            border: 1px solid rgba(212,175,55,0.18);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow:
+                0 40px 100px rgba(0,0,0,0.7),
+                0 0 0 1px rgba(212,175,55,0.08),
+                inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+
+        /* ─── Header ─────────────────────────────────────────── */
+        .header {
+            background: linear-gradient(135deg, rgba(212,175,55,0.1) 0%, rgba(212,175,55,0.04) 100%);
+            border-bottom: 1px solid rgba(212,175,55,0.15);
+            padding: 2.2rem 2.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+        }
+
+        .header-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #D4AF37, #a88520);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.1rem;
+        }
+
+        .header-text .brand {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.25em;
+            color: #D4AF37;
+            margin-bottom: 0.2rem;
+        }
+
+        .header-text .title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        /* ─── Order Summary Bar ──────────────────────────────── */
+        .summary-bar {
+            background: rgba(0,0,0,0.25);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 1.4rem 2.5rem;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+        }
+
+        .summary-bar.two-col { grid-template-columns: 1fr 1fr; }
+
+        .sum-item .sum-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            color: rgba(212,175,55,0.65);
+            margin-bottom: 0.3rem;
+        }
+
+        .sum-item .sum-val {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #ddddf0;
+            line-height: 1.4;
+        }
+
+        .sum-item.full { grid-column: 1 / -1; }
+
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.75rem;
+            border-radius: 5px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+        }
+
+        .badge-confirm { background: rgba(74,222,128,0.12); color: #4ade80; border: 1px solid rgba(74,222,128,0.25); }
+        .badge-reject  { background: rgba(248,113,113,0.12); color: #f87171; border: 1px solid rgba(248,113,113,0.25); }
+        .badge-pending { background: rgba(212,175,55,0.12);  color: #D4AF37; border: 1px solid rgba(212,175,55,0.25); }
+
+        /* ─── Items list ─────────────────────────────────────── */
+        .items-bar {
+            background: rgba(0,0,0,0.15);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 1rem 2.5rem;
+        }
+
+        .items-bar-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            color: rgba(212,175,55,0.65);
+            margin-bottom: 0.6rem;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.35rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-size: 0.85rem;
+        }
+
+        .item-row:last-child { border: none; }
+        .item-row .item-num { color: rgba(212,175,55,0.5); font-size: 0.75rem; margin-right: 0.6rem; }
+        .item-row .item-price { color: #D4AF37; font-weight: 600; font-size: 0.8rem; }
+
+        /* ─── Form ───────────────────────────────────────────── */
+        .form-section { padding: 2rem 2.5rem; }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group.full { grid-column: 1 / -1; }
+
+        label {
+            display: block;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            color: rgba(212,175,55,0.75);
+            margin-bottom: 0.45rem;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 9px;
+            padding: 0.75rem 1rem;
+            color: #ddddf0;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+            -webkit-appearance: none;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: rgba(212,175,55,0.4);
+            background: rgba(255,255,255,0.06);
+        }
+
+        select {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23D4AF37' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            padding-right: 2.5rem;
+        }
+
+        select option { background: #111120; color: #ddddf0; }
+
+        textarea {
+            min-height: 180px;
+            resize: vertical;
+            line-height: 1.65;
+            font-size: 0.82rem;
+        }
+
+        /* ─── Buttons ────────────────────────────────────────── */
+        .btn-row {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.25rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.85rem 1.5rem;
+            border-radius: 9px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+        }
+
+        .btn-cancel {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.4);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255,255,255,0.07);
+            color: rgba(255,255,255,0.7);
+            border-color: rgba(255,255,255,0.14);
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #D4AF37 0%, #b8920a 100%);
+            color: #000;
+            box-shadow: 0 4px 16px rgba(212,175,55,0.2);
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 28px rgba(212,175,55,0.35);
+        }
+
+        .btn-generate:active { transform: translateY(0); }
+
+        /* ─── Result Section ─────────────────────────────────── */
+        .result-section {
+            display: none;
+            border-top: 1px solid rgba(212,175,55,0.15);
+            background: rgba(212,175,55,0.03);
+            padding: 2rem 2.5rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-section.visible { display: block; }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .result-title {
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            color: rgba(212,175,55,0.75);
+        }
+
+        .result-ready {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #4ade80;
+            letter-spacing: 0.08em;
+        }
+
+        .result-box {
+            background: rgba(0,0,0,0.45);
+            border: 1px solid rgba(212,175,55,0.15);
+            border-radius: 10px;
+            padding: 1.5rem;
+            font-size: 0.82rem;
+            line-height: 1.75;
+            color: #c8c8da;
+            white-space: pre-wrap;
+            margin-bottom: 1rem;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-copy {
+            width: 100%;
+            padding: 0.9rem;
+            background: rgba(212,175,55,0.08);
+            border: 1px solid rgba(212,175,55,0.25);
+            border-radius: 9px;
+            color: #D4AF37;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+        }
+
+        .btn-copy:hover { background: rgba(212,175,55,0.14); border-color: rgba(212,175,55,0.4); }
+
+        .btn-copy.copied {
+            background: rgba(74,222,128,0.1);
+            border-color: rgba(74,222,128,0.3);
+            color: #4ade80;
+        }
+
+        /* ─── No-data state ──────────────────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-state p {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.25);
+            line-height: 1.6;
+        }
+
+        /* ─── Divider ────────────────────────────────────────── */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(212,175,55,0.2), transparent);
+            margin: 0;
+        }
+
+        @media (max-width: 560px) {
+            body { padding: 1rem 0.75rem; }
+            .header, .form-section, .result-section { padding-left: 1.5rem; padding-right: 1.5rem; }
+            .summary-bar { padding: 1.2rem 1.5rem; grid-template-columns: 1fr 1fr; }
+            .items-bar { padding: 1rem 1.5rem; }
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="panel">
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-icon">&#9670;</div>
+        <div class="header-text">
+            <div class="brand">GREKOLOUNGE</div>
+            <div class="title">Order Management System</div>
+        </div>
+    </div>
+
+    <!-- Dynamic content injected by JS -->
+    <div id="mainContent"></div>
+
+</div>
+
+<script>
+    const params  = new URLSearchParams(window.location.search);
+    const orderId = params.get('i') || '';
+    const cName   = params.get('n') || '';
+    const cEmail  = params.get('e') || '';
+    const total   = params.get('t') || '';
+    const action  = params.get('a') || '';
+    const rawItems = params.get('p') || '';
+
+    // Parse "Title:price|Title2:price2"
+    const items = rawItems
+        ? rawItems.split('|').map(seg => {
+            const idx = seg.lastIndexOf(':');
+            return idx > -1
+                ? { name: seg.substring(0, idx), price: seg.substring(idx + 1) }
+                : { name: seg, price: '' };
+          })
+        : [];
+
+    const isConfirm = action === 'confirm';
+    const badgeClass = isConfirm ? 'badge-confirm' : (action === 'reject' ? 'badge-reject' : 'badge-pending');
+    const badgeText  = isConfirm ? 'CONFIRMING ORDER' : (action === 'reject' ? 'REJECTING ORDER' : 'REVIEWING ORDER');
+
+    // Pre-written message templates
+    const itemsFormatted = items.length
+        ? items.map((it, i) => `  ${String(i+1).padStart(2,'0')}.  ${it.name}${it.price ? '  —  ' + it.price + ' EUR' : ''}`).join('\n')
+        : '  N/A';
+
+    const tmplConfirm = `Hello ${cName || 'Customer'},\n\nWe are pleased to inform you that your order has been successfully confirmed and processed.\n\nOrder Reference: ${orderId || 'N/A'}\nItems Ordered:\n${itemsFormatted}\nTotal Charged: ${total ? total + ' EUR' : 'N/A'}\n\nYour gift card(s) will be delivered to this email address shortly. Please allow up to 24 hours for processing.\n\nThank you for choosing GrekoLounge. We look forward to serving you again.\n\nBest regards,\nGrekoLounge Team`;
+
+    const tmplReject = `Hello ${cName || 'Customer'},\n\nThank you for your order. Unfortunately, we were unable to process your recent request at this time.\n\nOrder Reference: ${orderId || 'N/A'}\nTotal: ${total ? total + ' EUR' : 'N/A'}\n\nIf you have any questions, require clarification, or would like to place a new order, please do not hesitate to reach out to us directly.\n\nWe sincerely apologize for any inconvenience caused.\n\nBest regards,\nGrekoLounge Team`;
+
+    const defaultMsg = isConfirm ? tmplConfirm : (action === 'reject' ? tmplReject : '');
+
+    // Build UI
+    const main = document.getElementById('mainContent');
+
+    if (!orderId && !cEmail) {
+        main.innerHTML = `
+            <div class="empty-state">
+                <p>No order data was provided.<br>Open this page via the Discord order notification buttons.</p>
+            </div>`;
+    } else {
+        const itemRows = items.map((it, i) => `
+            <div class="item-row">
+                <span><span class="item-num">${String(i+1).padStart(2,'0')}.</span>${it.name}</span>
+                <span class="item-price">${it.price ? it.price + ' EUR' : ''}</span>
+            </div>`).join('');
+
+        main.innerHTML = `
+            <div class="summary-bar">
+                <div class="sum-item">
+                    <div class="sum-label">ORDER REFERENCE</div>
+                    <div class="sum-val">${orderId || '—'}</div>
+                </div>
+                <div class="sum-item">
+                    <div class="sum-label">CUSTOMER</div>
+                    <div class="sum-val">${cName || '—'}</div>
+                </div>
+                <div class="sum-item">
+                    <div class="sum-label">TOTAL</div>
+                    <div class="sum-val">${total ? total + ' EUR' : '—'}</div>
+                </div>
+                <div class="sum-item">
+                    <div class="sum-label">ACTION</div>
+                    <div class="sum-val"><span class="badge ${badgeClass}">${badgeText}</span></div>
+                </div>
+                <div class="sum-item">
+                    <div class="sum-label">EMAIL</div>
+                    <div class="sum-val">${cEmail || '—'}</div>
+                </div>
+            </div>
+
+            ${items.length ? `
+            <div class="items-bar">
+                <div class="items-bar-label">ORDER ITEMS</div>
+                ${itemRows}
+            </div>` : ''}
+
+            <div class="divider"></div>
+
+            <div class="form-section">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>CUSTOMER GMAIL</label>
+                        <input type="email" id="fEmail" value="${cEmail}">
+                    </div>
+                    <div class="form-group">
+                        <label>STATUS</label>
+                        <select id="fStatus">
+                            <option value="confirmed" ${isConfirm ? 'selected' : ''}>Order Confirmed</option>
+                            <option value="rejected"  ${action === 'reject' ? 'selected' : ''}>Order Rejected</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>MESSAGE</label>
+                    <textarea id="fMessage">${defaultMsg}</textarea>
+                </div>
+                <div class="btn-row">
+                    <button class="btn btn-cancel" onclick="resetForm()">Cancel</button>
+                    <button class="btn btn-generate" onclick="generateEmail()">Generate Response</button>
+                </div>
+            </div>
+
+            <div id="resultSection" class="result-section">
+                <div class="result-header">
+                    <span class="result-title">GENERATED EMAIL — READY TO SEND</span>
+                    <span class="result-ready">Ready to copy</span>
+                </div>
+                <div id="resultBox" class="result-box"></div>
+                <button class="btn-copy" id="copyBtn" onclick="copyEmail()">Copy to Clipboard</button>
+            </div>
+        `;
+
+        // Update message template when status changes
+        document.getElementById('fStatus').addEventListener('change', function() {
+            document.getElementById('fMessage').value =
+                this.value === 'confirmed' ? tmplConfirm : tmplReject;
+        });
+    }
+
+    function generateEmail() {
+        const email   = document.getElementById('fEmail').value.trim();
+        const status  = document.getElementById('fStatus').value;
+        const message = document.getElementById('fMessage').value.trim();
+
+        if (!email)   { alert('Please enter the customer email.'); return; }
+        if (!message) { alert('Please write a message.'); return; }
+
+        const subject = status === 'confirmed'
+            ? `Your GrekoLounge Order ${orderId} — Confirmed`
+            : `Your GrekoLounge Order ${orderId} — Update Required`;
+
+        const fullEmail = `TO: ${email}\nSUBJECT: ${subject}\n\n${message}`;
+
+        document.getElementById('resultBox').textContent = fullEmail;
+        const rs = document.getElementById('resultSection');
+        rs.classList.add('visible');
+        rs.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function copyEmail() {
+        const text = document.getElementById('resultBox').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.getElementById('copyBtn');
+            const prev = btn.textContent;
+            btn.textContent = 'Copied to Clipboard';
+            btn.classList.add('copied');
+            setTimeout(() => {
+                btn.textContent = prev;
+                btn.classList.remove('copied');
+            }, 2500);
+        });
+    }
+
+    function resetForm() {
+        document.getElementById('resultSection').classList.remove('visible');
+        document.getElementById('fEmail').value   = cEmail;
+        document.getElementById('fStatus').value  = isConfirm ? 'confirmed' : 'rejected';
+        document.getElementById('fMessage').value = defaultMsg;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+</body>
+</html>
