@@ -35,6 +35,31 @@
         </div>
     </div>
 
+    <!-- Checkout Modal -->
+    <div class="checkout-overlay" id="checkoutOverlay">
+        <div class="checkout-modal">
+            <h3>Enter Your Information</h3>
+            <p>Please provide your details below to proceed with your order.</p>
+            <div class="form-group">
+                <label for="checkoutUsername">Username</label>
+                <input type="text" id="checkoutUsername" placeholder="Enter your username" required>
+            </div>
+            <div class="form-group">
+                <label for="checkoutEmail">Email Address</label>
+                <input type="email" id="checkoutEmail" placeholder="Enter your email address" required>
+            </div>
+            <div class="checkout-actions">
+                <button class="btn-secondary" id="checkoutCancel">Cancel</button>
+                <button class="btn-primary" id="checkoutConfirm">Confirm Order</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div class="toast-message" id="toastMessage">
+        Your request has been successfully submitted to our team for review. Payment details will be sent to your email shortly.
+    </div>
+
     <header class="hero" id="home">
         <div class="hero-content">
             <h1>Unlock Unlimited Value</h1>
