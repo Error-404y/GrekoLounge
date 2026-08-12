@@ -9,32 +9,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const addToCartBtns       = document.querySelectorAll('.add-to-cart');
 
     // ── Cart Modal ───────────────────────────────────────────────────────────
-    cartBtn.addEventListener('click', () => cartOverlay.classList.add('active'));
-    closeCartBtn.addEventListener('click', () => cartOverlay.classList.remove('active'));
+    cartBtn.addEventListener('click', () => {
+        cartOverlay.classList.add('active');
+    });
+
+    closeCartBtn.addEventListener('click', () => {
+        cartOverlay.classList.remove('active');
+    });
+
     cartOverlay.addEventListener('click', (e) => {
-        if (e.target === cartOverlay) cartOverlay.classList.remove('active');
+        if (e.target === cartOverlay) {
+            cartOverlay.classList.remove('active');
+        }
     });
 
     // ── Add to Cart ──────────────────────────────────────────────────────────
     addToCartBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const title = btn.getAttribute('data-title');
-            const price = parseInt(btn.getAttribute('data-price'));
+            const price = parseInt(btn.getAttribute('data-price'), 10);
             const value = btn.getAttribute('data-value');
 
-            cart.push({ title, price, value });
+            cart.push({
+                title,
+                price,
+                value
+            });
+
             updateCart();
 
             const originalText = btn.textContent;
+
             btn.textContent = 'Added!';
-            btn.style.background   = '#4CAF50';
-            btn.style.color        = 'white';
-            btn.style.borderColor  = '#4CAF50';
+            btn.style.background = '#4CAF50';
+            btn.style.color = 'white';
+            btn.style.borderColor = '#4CAF50';
 
             setTimeout(() => {
-                btn.textContent       = originalText;
-                btn.style.background  = '';
-                btn.style.color       = '';
+                btn.textContent = originalText;
+                btn.style.background = '';
+                btn.style.color = '';
                 btn.style.borderColor = '';
             }, 1500);
         });
@@ -45,25 +59,35 @@ document.addEventListener('DOMContentLoaded', () => {
         cartBtn.textContent = `Cart (${cart.length})`;
 
         if (cart.length === 0) {
-            cartItemsContainer.innerHTML = '<p class="empty-cart">Your cart is empty.</p>';
+            cartItemsContainer.innerHTML =
+                '<p class="empty-cart">Your cart is empty.</p>';
+
             cartTotalEl.textContent = '0';
             return;
         }
 
         cartItemsContainer.innerHTML = '';
+
         let total = 0;
 
         cart.forEach((item, index) => {
             total += item.price;
+
             const itemEl = document.createElement('div');
+
             itemEl.classList.add('cart-item');
+
             itemEl.innerHTML = `
                 <div class="cart-item-info">
-                    <h4>${item.title}</h4>
+                    <h4>${escapeHtml(item.title)}</h4>
                     <p>${item.price} &euro;</p>
                 </div>
-                <button class="remove-item" data-index="${index}">Remove</button>
+
+                <button class="remove-item" data-index="${index}">
+                    Remove
+                </button>
             `;
+
             cartItemsContainer.appendChild(itemEl);
         });
 
@@ -71,7 +95,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.querySelectorAll('.remove-item').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const index = parseInt(e.target.getAttribute('data-index'));
+                const index = parseInt(
+                    e.target.getAttribute('data-index'),
+                    10
+                );
+
                 cart.splice(index, 1);
                 updateCart();
             });
@@ -89,56 +117,108 @@ document.addEventListener('DOMContentLoaded', () => {
 
     checkoutBtn.addEventListener('click', () => {
         if (cart.length === 0) {
-            alert('Your cart is empty! Please add some cards before checking out.');
+            alert(
+                'Your cart is empty! Please add some cards before checking out.'
+            );
             return;
         }
+
         cartOverlay.classList.remove('active');
         checkoutOverlay.classList.add('active');
     });
 
     checkoutCancel.addEventListener('click', () => {
         checkoutOverlay.classList.remove('active');
+
         checkoutUsername.value = '';
-        checkoutEmail.value    = '';
+        checkoutEmail.value = '';
     });
 
-    checkoutConfirm.addEventListener('click', () => {
+    checkoutConfirm.addEventListener('click', async () => {
         const username = checkoutUsername.value.trim();
-        const email    = checkoutEmail.value.trim();
+        const email = checkoutEmail.value.trim();
 
         if (!username || !email) {
             alert('Please fill in both fields.');
             return;
         }
 
+        // Prevent double submissions
+        checkoutConfirm.disabled = true;
+        checkoutConfirm.textContent = 'Submitting...';
+
         // ── Order data ───────────────────────────────────────────────────────
-        const cartTotal    = cart.reduce((sum, item) => sum + item.price, 0);
-        const now          = new Date();
-        const timestamp    = now.toISOString();
-        const orderId      = `GL-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${Math.random().toString(36).substring(2,7).toUpperCase()}`;
+        const cartTotal = cart.reduce(
+            (sum, item) => sum + item.price,
+            0
+        );
+
+        const now = new Date();
+
+        const timestamp = now.toISOString();
+
+        const orderId =
+            `GL-${now.getFullYear()}` +
+            `${String(now.getMonth() + 1).padStart(2, '0')}` +
+            `${String(now.getDate()).padStart(2, '0')}-` +
+            `${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+
         const readableTime = now.toLocaleString('en-GB', {
-            day: '2-digit', month: 'short', year: 'numeric',
-            hour: '2-digit', minute: '2-digit', second: '2-digit'
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
         });
 
         // ── Monospace order breakdown block ──────────────────────────────────
-        const W         = 40;
-        const itemRows  = cart.map((item, i) => {
-            const num   = `  ${String(i+1).padStart(2,'0')}.  `;
+        const W = 40;
+
+        const itemRows = cart.map((item, i) => {
+            const num = `  ${String(i + 1).padStart(2, '0')}.  `;
             const price = `${item.price} EUR`;
-            const name  = item.title.substring(0, W - num.length - price.length - 1);
-            const gap   = W - num.length - name.length - price.length;
-            return num + name + ' '.repeat(Math.max(1, gap)) + price;
+
+            const name = item.title.substring(
+                0,
+                W - num.length - price.length - 1
+            );
+
+            const gap =
+                W -
+                num.length -
+                name.length -
+                price.length;
+
+            return (
+                num +
+                name +
+                ' '.repeat(Math.max(1, gap)) +
+                price
+            );
         });
-        const divLine    = '  ' + '─'.repeat(W - 2);
+
+        const divLine = '  ' + '─'.repeat(W - 2);
+
         const totalLabel = '  TOTAL';
-        const totalVal   = `${cartTotal} EUR`;
-        const totalGap   = W - totalLabel.length - totalVal.length;
-        const totalRow   = totalLabel + ' '.repeat(Math.max(1, totalGap)) + totalVal;
+        const totalVal = `${cartTotal} EUR`;
 
-        const breakdownBlock = '```\n' + [...itemRows, divLine, totalRow].join('\n') + '\n```';
+        const totalGap =
+            W -
+            totalLabel.length -
+            totalVal.length;
 
-        // ── Header info block ─────────────────────────────────────────────────
+        const totalRow =
+            totalLabel +
+            ' '.repeat(Math.max(1, totalGap)) +
+            totalVal;
+
+        const breakdownBlock =
+            '```\n' +
+            [...itemRows, divLine, totalRow].join('\n') +
+            '\n```';
+
+        // ── Header info block ────────────────────────────────────────────────
         const headerBlock = [
             '```',
             `  ORDER REF    ${orderId}`,
@@ -147,86 +227,130 @@ document.addEventListener('DOMContentLoaded', () => {
             '```'
         ].join('\n');
 
-        // ── Discord Webhook Payload ───────────────────────────────────────────
-        const WEBHOOK_URL = "https://discord.com/api/webhooks/1537168912339181770/66ZnGYajoPTIyzOkBbWMEIYWBmfNLleWn7U2s_1l_7FizY01JMFYnTRzKcLQrczSRQFw";
+        // ── Discord Webhook ──────────────────────────────────────────────────
+        // IMPORTANT:
+        // Generate a NEW Discord webhook and put the new URL here.
+        const WEBHOOK_URL = 'YOUR_NEW_DISCORD_WEBHOOK_URL';
 
-        // Encode items for admin panel URL: "Title:price|Title2:price2"
-        const itemsSummary = cart.map(item => `${item.title}:${item.price}`).join('|');
-        const BASE = 'http://localhost:8080';
-        const adminBase = `${BASE}/admin.html?i=${encodeURIComponent(orderId)}&n=${encodeURIComponent(username)}&e=${encodeURIComponent(email)}&t=${cartTotal}&p=${encodeURIComponent(itemsSummary)}`;
+        // ── Admin URL ────────────────────────────────────────────────────────
+        //
+        // IMPORTANT:
+        // Replace this with your REAL hosted admin page.
+        //
+        // Example:
+        // https://error-404y.github.io/GrekoLounge/admin.html
+        //
+        const ADMIN_BASE =
+            'https://error-404y.github.io/GrekoLounge/admin.html';
 
+        const itemsSummary = cart
+            .map(item => `${item.title}:${item.price}`)
+            .join('|');
+
+        const adminBase =
+            `${ADMIN_BASE}` +
+            `?i=${encodeURIComponent(orderId)}` +
+            `&n=${encodeURIComponent(username)}` +
+            `&e=${encodeURIComponent(email)}` +
+            `&t=${encodeURIComponent(cartTotal)}` +
+            `&p=${encodeURIComponent(itemsSummary)}`;
+
+        // ── Discord Payload ──────────────────────────────────────────────────
         const webhookPayload = {
-            username: "GrekoLounge",
+            username: 'GrekoLounge',
+
             embeds: [
                 {
                     color: 0xD4AF37,
+
                     author: {
-                        name: "GREKOLOUNGE  ·  ORDER MANAGEMENT SYSTEM"
+                        name:
+                            'GREKOLOUNGE  ·  ORDER MANAGEMENT SYSTEM'
                     },
-                    title: "New Order Received",
+
+                    title: 'New Order Received',
+
                     description: headerBlock,
+
                     fields: [
                         {
-                            name: "CUSTOMER",
+                            name: 'CUSTOMER',
                             value: `\`\`\`${username}\`\`\``,
                             inline: true
                         },
+
                         {
-                            name: "EMAIL",
+                            name: 'EMAIL',
                             value: `\`\`\`${email}\`\`\``,
                             inline: true
                         },
+
                         {
-                            name: "\u200b",
-                            value: "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+                            name: '\u200b',
+                            value:
+                                '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
                             inline: false
                         },
+
                         {
-                            name: "ORDER BREAKDOWN",
+                            name: 'ORDER BREAKDOWN',
                             value: breakdownBlock,
                             inline: false
                         },
+
                         {
-                            name: "\u200b",
-                            value: "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+                            name: '\u200b',
+                            value:
+                                '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
                             inline: false
                         },
+
                         {
-                            name: "TOTAL CHARGED",
+                            name: 'TOTAL CHARGED',
                             value: `**${cartTotal} EUR**`,
                             inline: true
                         },
+
                         {
-                            name: "ITEMS",
-                            value: `**${cart.length}** item${cart.length !== 1 ? 's' : ''}`,
+                            name: 'ITEMS',
+                            value:
+                                `**${cart.length}** item` +
+                                `${cart.length !== 1 ? 's' : ''}`,
                             inline: true
                         },
+
                         {
-                            name: "STATUS",
-                            value: "**Pending Review**",
+                            name: 'STATUS',
+                            value: '**Pending Review**',
                             inline: true
                         }
                     ],
+
                     footer: {
-                        text: `GrekoLounge  ·  Secure Gift Card Exchange  ·  ${orderId}`
+                        text:
+                            `GrekoLounge  ·  Secure Gift Card Exchange  ·  ${orderId}`
                     },
+
                     timestamp: timestamp
                 }
             ],
+
             components: [
                 {
                     type: 1,
+
                     components: [
                         {
                             type: 2,
                             style: 5,
-                            label: "Confirm Order",
+                            label: 'Confirm Order',
                             url: `${adminBase}&a=confirm`
                         },
+
                         {
                             type: 2,
                             style: 5,
-                            label: "Reject Order",
+                            label: 'Reject Order',
                             url: `${adminBase}&a=reject`
                         }
                     ]
@@ -234,45 +358,124 @@ document.addEventListener('DOMContentLoaded', () => {
             ]
         };
 
-        fetch(WEBHOOK_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(webhookPayload)
-        }).catch(err => console.error("Webhook failed:", err));
+        try {
+            // ── Submit order ──────────────────────────────────────────────────
+            const response = await fetch(WEBHOOK_URL, {
+                method: 'POST',
 
-        // ── Close modal & clear state ────────────────────────────────────────
-        checkoutOverlay.classList.remove('active');
-        checkoutUsername.value = '';
-        checkoutEmail.value    = '';
+                headers: {
+                    'Content-Type': 'application/json'
+                },
 
-        cart = [];
-        updateCart();
+                body: JSON.stringify(webhookPayload)
+            });
+
+            if (!response.ok) {
+                throw new Error(
+                    `Webhook failed with status ${response.status}`
+                );
+            }
+
+            // ── Submission successful ─────────────────────────────────────────
+            checkoutOverlay.classList.remove('active');
+
+            checkoutUsername.value = '';
+            checkoutEmail.value = '';
+
+            cart = [];
+            updateCart();
+
+            // Only show success AFTER successful submission
+            showToast();
+
+        } catch (error) {
+            console.error('Order submission failed:', error);
+
+            alert(
+                'Your order could not be submitted. Please try again.'
+            );
+
+        } finally {
+            checkoutConfirm.disabled = false;
+            checkoutConfirm.textContent = 'Confirm Order';
+        }
+    });
+
+    // ── Toast ─────────────────────────────────────────────────────────────────
+    function showToast() {
+        if (!toastMessage) return;
+
+        // Remove any existing state first
+        toastMessage.classList.remove('show');
+
+        // Force browser to apply hidden state before showing
+        void toastMessage.offsetWidth;
 
         toastMessage.classList.add('show');
-        setTimeout(() => toastMessage.classList.remove('show'), 4000);
-    });
+
+        setTimeout(() => {
+            toastMessage.classList.remove('show');
+        }, 4000);
+    }
 
     // ── Mouse glow effect on cards ───────────────────────────────────────────
     const cards = document.querySelectorAll('.shop-card');
+
     cards.forEach(card => {
         card.addEventListener('mousemove', (e) => {
             const glow = card.querySelector('.card-glow');
+
+            if (!glow) return;
+
             const rect = card.getBoundingClientRect();
-            const x    = e.clientX - rect.left;
-            const y    = e.clientY - rect.top;
 
-            let color = 'rgba(212, 175, 55, 0.15)';
-            if (card.classList.contains('card-google'))   color = 'rgba(61, 220, 132, 0.15)';
-            if (card.classList.contains('card-apple'))    color = 'rgba(255, 255, 255, 0.15)';
-            if (card.classList.contains('card-steam'))    color = 'rgba(102, 192, 244, 0.15)';
-            if (card.classList.contains('card-paysafe'))  color = 'rgba(0, 166, 255, 0.15)';
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
 
-            glow.style.background = `radial-gradient(circle at ${x}px ${y}px, ${color} 0%, transparent 60%)`;
+            let color =
+                'rgba(212, 175, 55, 0.15)';
+
+            if (card.classList.contains('card-google')) {
+                color = 'rgba(61, 220, 132, 0.15)';
+            }
+
+            if (card.classList.contains('card-apple')) {
+                color = 'rgba(255, 255, 255, 0.15)';
+            }
+
+            if (card.classList.contains('card-steam')) {
+                color = 'rgba(102, 192, 244, 0.15)';
+            }
+
+            if (card.classList.contains('card-paysafe')) {
+                color = 'rgba(0, 166, 255, 0.15)';
+            }
+
+            glow.style.background =
+                `radial-gradient(
+                    circle at ${x}px ${y}px,
+                    ${color} 0%,
+                    transparent 60%
+                )`;
         });
 
         card.addEventListener('mouseleave', () => {
             const glow = card.querySelector('.card-glow');
-            glow.style.background = 'radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%)';
+
+            if (!glow) return;
+
+            glow.style.background =
+                'radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%)';
         });
     });
+
+    // ── Simple HTML escaping ─────────────────────────────────────────────────
+    function escapeHtml(value) {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
 });
