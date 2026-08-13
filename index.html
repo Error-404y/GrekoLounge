@@ -8,249 +8,789 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
+
     <nav class="navbar">
         <div class="logo">Greko<span>Lounge</span></div>
+
         <ul class="nav-links">
             <li><a href="#home">Home</a></li>
             <li><a href="#shop">Shop</a></li>
             <li><a href="#about">About</a></li>
         </ul>
-        <button class="btn-primary" id="cartBtn">Cart (0)</button>
+
+        <button class="btn-primary" id="cartBtn">
+            Cart (0)
+        </button>
     </nav>
+
 
     <!-- Cart Modal -->
     <div class="cart-overlay" id="cartOverlay">
         <div class="cart-modal">
+
             <div class="cart-header">
                 <h3>Your Cart</h3>
-                <button class="close-cart" id="closeCart">&times;</button>
+
+                <button class="close-cart" id="closeCart">
+                    &times;
+                </button>
             </div>
+
             <div class="cart-items" id="cartItems">
-                <p class="empty-cart">Your cart is empty.</p>
+                <p class="empty-cart">
+                    Your cart is empty.
+                </p>
             </div>
+
             <div class="cart-footer">
-                <div class="cart-total">Total: <span id="cartTotal">0</span> &euro;</div>
-                <button class="btn-primary checkout-btn">Checkout</button>
+                <div class="cart-total">
+                    Total:
+                    <span id="cartTotal">0</span> &euro;
+                </div>
+
+                <button class="btn-primary checkout-btn">
+                    Checkout
+                </button>
             </div>
+
         </div>
     </div>
+
+
+    <!-- Minimum Order Modal -->
+    <div class="minimum-order-overlay" id="minimumOrderModal">
+        <div class="minimum-order-modal">
+
+            <h3>Minimum Order Required</h3>
+
+            <p>
+                The minimum order value is
+                <strong>&euro;100</strong>.
+                Please add another item to your cart to meet
+                the minimum order requirement.
+            </p>
+
+            <button
+                class="btn-primary"
+                id="minimumOrderContinue"
+            >
+                Continue Shopping
+            </button>
+
+        </div>
+    </div>
+
 
     <!-- Checkout Modal -->
     <div class="checkout-overlay" id="checkoutOverlay">
         <div class="checkout-modal">
+
             <h3>Enter Your Information</h3>
-            <p>Please provide your details below to proceed with your order.</p>
+
+            <p>
+                Please provide your details below to proceed
+                with your order.
+            </p>
+
             <div class="form-group">
-                <label for="checkoutUsername">Username</label>
-                <input type="text" id="checkoutUsername" placeholder="Enter your username" required>
+                <label for="checkoutUsername">
+                    Username
+                </label>
+
+                <input
+                    type="text"
+                    id="checkoutUsername"
+                    placeholder="Enter your username"
+                    required
+                >
             </div>
+
             <div class="form-group">
-                <label for="checkoutEmail">Email Address</label>
-                <input type="email" id="checkoutEmail" placeholder="Enter your email address" required>
+                <label for="checkoutEmail">
+                    Email Address
+                </label>
+
+                <input
+                    type="email"
+                    id="checkoutEmail"
+                    placeholder="Enter your email address"
+                    required
+                >
             </div>
+
             <div class="checkout-actions">
-                <button class="btn-secondary" id="checkoutCancel">Cancel</button>
-                <button class="btn-primary" id="checkoutConfirm">Confirm Order</button>
+
+                <button
+                    class="btn-secondary"
+                    id="checkoutCancel"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    class="btn-primary"
+                    id="checkoutConfirm"
+                >
+                    Confirm Order
+                </button>
+
             </div>
+
         </div>
     </div>
+
 
     <!-- Success Toast -->
     <div class="toast-message" id="toastMessage">
-        Your request has been successfully submitted to our team for review. Payment details will be sent to your email shortly.
+        Your request has been successfully submitted to our team
+        for review. Payment details will be sent to your email shortly.
     </div>
 
+
+    <!-- Hero -->
     <header class="hero" id="home">
+
         <div class="hero-content">
-            <h1>Unlock Unlimited Value</h1>
-            <p>Premium Gift Cards at Exclusive Rates. Elevate your shopping experience today.</p>
-            <a href="#shop" class="btn-primary hero-btn">Explore Cards</a>
+
+            <h1>
+                Unlock Unlimited Value
+            </h1>
+
+            <p>
+                Premium Gift Cards at Exclusive Rates.
+                Elevate your shopping experience today.
+            </p>
+
+            <a
+                href="#shop"
+                class="btn-primary hero-btn"
+            >
+                Explore Cards
+            </a>
+
         </div>
+
         <div class="hero-background"></div>
+
     </header>
 
+
+    <!-- Shop -->
     <section class="shop-section" id="shop">
+
         <div class="section-header">
-            <h2>Select Your Brand</h2>
-            <p>Choose your preferred gift card below.</p>
+
+            <h2>
+                Select Your Brand
+            </h2>
+
+            <p>
+                Choose your preferred gift card below.
+            </p>
+
         </div>
+
 
         <!-- Amazon -->
-        <h3 class="brand-title">Amazon</h3>
+        <h3 class="brand-title">
+            Amazon
+        </h3>
+
         <div class="card-grid">
+
             <div class="shop-card">
+
                 <div class="card-glow"></div>
+
                 <div class="card-inner">
-                    <div class="card-brand">amazon</div>
-                    <div class="card-value">350 &euro;</div>
-                    <div class="card-price">Purchase for: <span>70 &euro;</span></div>
-                    <button class="btn-secondary add-to-cart" data-title="Amazon 350 &euro;" data-value="350" data-price="70">Add to Cart</button>
+
+                    <div class="card-brand">
+                        amazon
+                    </div>
+
+                    <div class="card-value">
+                        350 &euro;
+                    </div>
+
+                    <div class="card-price">
+                        Purchase for:
+                        <span>70 &euro;</span>
+                    </div>
+
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Amazon 350 &euro;"
+                        data-value="350"
+                        data-price="70"
+                    >
+                        Add to Cart
+                    </button>
+
                 </div>
+
             </div>
+
+
             <div class="shop-card premium">
+
                 <div class="card-glow"></div>
+
                 <div class="card-inner">
-                    <div class="card-brand">amazon</div>
-                    <div class="card-value">800 &euro;</div>
-                    <div class="card-price">Purchase for: <span>180 &euro;</span></div>
-                    <button class="btn-secondary add-to-cart" data-title="Amazon 800 &euro;" data-value="800" data-price="180">Add to Cart</button>
+
+                    <div class="card-brand">
+                        amazon
+                    </div>
+
+                    <div class="card-value">
+                        800 &euro;
+                    </div>
+
+                    <div class="card-price">
+                        Purchase for:
+                        <span>180 &euro;</span>
+                    </div>
+
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Amazon 800 &euro;"
+                        data-value="800"
+                        data-price="180"
+                    >
+                        Add to Cart
+                    </button>
+
                 </div>
+
             </div>
+
+
             <div class="shop-card elite">
+
                 <div class="card-glow"></div>
+
                 <div class="card-inner">
-                    <div class="card-brand">amazon</div>
-                    <div class="card-value">1800 &euro;</div>
-                    <div class="card-price">Purchase for: <span>380 &euro;</span></div>
-                    <button class="btn-secondary add-to-cart" data-title="Amazon 1800 &euro;" data-value="1800" data-price="38ß">Add to Cart</button>
+
+                    <div class="card-brand">
+                        amazon
+                    </div>
+
+                    <div class="card-value">
+                        1800 &euro;
+                    </div>
+
+                    <div class="card-price">
+                        Purchase for:
+                        <span>380 &euro;</span>
+                    </div>
+
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Amazon 1800 &euro;"
+                        data-value="1800"
+                        data-price="380"
+                    >
+                        Add to Cart
+                    </button>
+
                 </div>
+
             </div>
+
         </div>
+
 
         <!-- Google Play -->
-        <h3 class="brand-title" style="margin-top: 5rem;">Google Play</h3>
+        <h3
+            class="brand-title"
+            style="margin-top: 5rem;"
+        >
+            Google Play
+        </h3>
+
         <div class="card-grid">
+
             <div class="shop-card card-google">
+
                 <div class="card-glow"></div>
+
                 <div class="card-inner">
-                    <div class="card-brand">google play</div>
-                    <div class="card-value">350 &euro;</div>
-                    <div class="card-price">Purchase for: <span>80 &euro;</span></div>
-                    <button class="btn-secondary add-to-cart" data-title="Google Play 350 &euro;" data-value="350" data-price="80">Add to Cart</button>
+
+                    <div class="card-brand">
+                        google play
+                    </div>
+
+                    <div class="card-value">
+                        350 &euro;
+                    </div>
+
+                    <div class="card-price">
+                        Purchase for:
+                        <span>80 &euro;</span>
+                    </div>
+
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Google Play 350 &euro;"
+                        data-value="350"
+                        data-price="80"
+                    >
+                        Add to Cart
+                    </button>
+
                 </div>
+
             </div>
+
+
             <div class="shop-card card-google premium">
+
                 <div class="card-glow"></div>
+
                 <div class="card-inner">
-                    <div class="card-brand">google play</div>
-                    <div class="card-value">800 &euro;</div>
-                    <div class="card-price">Purchase for: <span>250 &euro;</span></div>
-                    <button class="btn-secondary add-to-cart" data-title="Google Play 800 &euro;" data-value="800" data-price="250">Add to Cart</button>
+
+                    <div class="card-brand">
+                        google play
+                    </div>
+
+                    <div class="card-value">
+                        800 &euro;
+                    </div>
+
+                    <div class="card-price">
+                        Purchase for:
+                        <span>250 &euro;</span>
+                    </div>
+
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Google Play 800 &euro;"
+                        data-value="800"
+                        data-price="250"
+                    >
+                        Add to Cart
+                    </button>
+
                 </div>
+
             </div>
+
+
             <div class="shop-card card-google elite">
+
                 <div class="card-glow"></div>
+
                 <div class="card-inner">
-                    <div class="card-brand">google play</div>
-                    <div class="card-value">1800 &euro;</div>
-                    <div class="card-price">Purchase for: <span>450 &euro;</span></div>
-                    <button class="btn-secondary add-to-cart" data-title="Google Play 1800 &euro;" data-value="1800" data-price="450">Add to Cart</button>
+
+                    <div class="card-brand">
+                        google play
+                    </div>
+
+                    <div class="card-value">
+                        1800 &euro;
+                    </div>
+
+                    <div class="card-price">
+                        Purchase for:
+                        <span>450 &euro;</span>
+                    </div>
+
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Google Play 1800 &euro;"
+                        data-value="1800"
+                        data-price="450"
+                    >
+                        Add to Cart
+                    </button>
+
                 </div>
+
             </div>
+
         </div>
+
 
         <!-- Apple -->
-        <h3 class="brand-title" style="margin-top: 5rem;">Apple</h3>
+        <h3
+            class="brand-title"
+            style="margin-top: 5rem;"
+        >
+            Apple
+        </h3>
+
         <div class="card-grid">
+
             <div class="shop-card card-apple">
+
                 <div class="card-glow"></div>
+
                 <div class="card-inner">
-                    <div class="card-brand">apple</div>
-                    <div class="card-value">350 &euro;</div>
-                    <div class="card-price">Purchase for: <span>80 &euro;</span></div>
-                    <button class="btn-secondary add-to-cart" data-title="Apple 350 &euro;" data-value="350" data-price="80">Add to Cart</button>
+
+                    <div class="card-brand">
+                        apple
+                    </div>
+
+                    <div class="card-value">
+                        350 &euro;
+                    </div>
+
+                    <div class="card-price">
+                        Purchase for:
+                        <span>80 &euro;</span>
+                    </div>
+
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Apple 350 &euro;"
+                        data-value="350"
+                        data-price="80"
+                    >
+                        Add to Cart
+                    </button>
+
                 </div>
+
             </div>
+
+
             <div class="shop-card card-apple premium">
+
                 <div class="card-glow"></div>
+
                 <div class="card-inner">
-                    <div class="card-brand">apple</div>
-                    <div class="card-value">800 &euro;</div>
-                    <div class="card-price">Purchase for: <span>200 &euro;</span></div>
-                    <button class="btn-secondary add-to-cart" data-title="Apple 800 &euro;" data-value="800" data-price="200">Add to Cart</button>
+
+                    <div class="card-brand">
+                        apple
+                    </div>
+
+                    <div class="card-value">
+                        800 &euro;
+                    </div>
+
+                    <div class="card-price">
+                        Purchase for:
+                        <span>200 &euro;</span>
+                    </div>
+
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Apple 800 &euro;"
+                        data-value="800"
+                        data-price="200"
+                    >
+                        Add to Cart
+                    </button>
+
                 </div>
+
             </div>
+
+
             <div class="shop-card card-apple elite">
+
                 <div class="card-glow"></div>
+
                 <div class="card-inner">
-                    <div class="card-brand">apple</div>
-                    <div class="card-value">1800 &euro;</div>
-                    <div class="card-price">Purchase for: <span>430 &euro;</span></div>
-                    <button class="btn-secondary add-to-cart" data-title="Apple 1800 &euro;" data-value="1800" data-price="430">Add to Cart</button>
+
+                    <div class="card-brand">
+                        apple
+                    </div>
+
+                    <div class="card-value">
+                        1800 &euro;
+                    </div>
+
+                    <div class="card-price">
+                        Purchase for:
+                        <span>430 &euro;</span>
+                    </div>
+
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Apple 1800 &euro;"
+                        data-value="1800"
+                        data-price="430"
+                    >
+                        Add to Cart
+                    </button>
+
                 </div>
+
             </div>
+
         </div>
+
 
         <!-- Steam -->
-        <h3 class="brand-title" style="margin-top: 5rem;">Steam</h3>
+        <h3
+            class="brand-title"
+            style="margin-top: 5rem;"
+        >
+            Steam
+        </h3>
+
         <div class="card-grid">
+
             <div class="shop-card card-steam">
+
                 <div class="card-glow"></div>
+
                 <div class="card-inner">
-                    <div class="card-brand">steam</div>
-                    <div class="card-value">350 &euro;</div>
-                    <div class="card-price">Purchase for: <span>70 &euro;</span></div>
-                    <button class="btn-secondary add-to-cart" data-title="Steam 350 &euro;" data-value="350" data-price="70">Add to Cart</button>
+
+                    <div class="card-brand">
+                        steam
+                    </div>
+
+                    <div class="card-value">
+                        350 &euro;
+                    </div>
+
+                    <div class="card-price">
+                        Purchase for:
+                        <span>70 &euro;</span>
+                    </div>
+
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Steam 350 &euro;"
+                        data-value="350"
+                        data-price="70"
+                    >
+                        Add to Cart
+                    </button>
+
                 </div>
+
             </div>
+
+
             <div class="shop-card card-steam premium">
+
                 <div class="card-glow"></div>
+
                 <div class="card-inner">
-                    <div class="card-brand">steam</div>
-                    <div class="card-value">800 &euro;</div>
-                    <div class="card-price">Purchase for: <span>200 &euro;</span></div>
-                    <button class="btn-secondary add-to-cart" data-title="Steam 800 &euro;" data-value="800" data-price="200">Add to Cart</button>
+
+                    <div class="card-brand">
+                        steam
+                    </div>
+
+                    <div class="card-value">
+                        800 &euro;
+                    </div>
+
+                    <div class="card-price">
+                        Purchase for:
+                        <span>200 &euro;</span>
+                    </div>
+
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Steam 800 &euro;"
+                        data-value="800"
+                        data-price="200"
+                    >
+                        Add to Cart
+                    </button>
+
                 </div>
+
             </div>
+
+
             <div class="shop-card card-steam elite">
+
                 <div class="card-glow"></div>
+
                 <div class="card-inner">
-                    <div class="card-brand">steam</div>
-                    <div class="card-value">1800 &euro;</div>
-                    <div class="card-price">Purchase for: <span>430 &euro;</span></div>
-                    <button class="btn-secondary add-to-cart" data-title="Steam 1800 &euro;" data-value="1800" data-price="430">Add to Cart</button>
+
+                    <div class="card-brand">
+                        steam
+                    </div>
+
+                    <div class="card-value">
+                        1800 &euro;
+                    </div>
+
+                    <div class="card-price">
+                        Purchase for:
+                        <span>430 &euro;</span>
+                    </div>
+
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Steam 1800 &euro;"
+                        data-value="1800"
+                        data-price="430"
+                    >
+                        Add to Cart
+                    </button>
+
                 </div>
+
             </div>
+
         </div>
+
 
         <!-- Paysafe -->
-        <h3 class="brand-title" style="margin-top: 5rem;">Paysafe</h3>
+        <h3
+            class="brand-title"
+            style="margin-top: 5rem;"
+        >
+            Paysafe
+        </h3>
+
         <div class="card-grid">
+
             <div class="shop-card card-paysafe">
+
                 <div class="card-glow"></div>
+
                 <div class="card-inner">
-                    <div class="card-brand">paysafe</div>
-                    <div class="card-value">350 &euro;</div>
-                    <div class="card-price">Purchase for: <span>90 &euro;</span></div>
-                    <button class="btn-secondary add-to-cart" data-title="Paysafe 350 &euro;" data-value="350" data-price="90">Add to Cart</button>
+
+                    <div class="card-brand">
+                        paysafe
+                    </div>
+
+                    <div class="card-value">
+                        350 &euro;
+                    </div>
+
+                    <div class="card-price">
+                        Purchase for:
+                        <span>90 &euro;</span>
+                    </div>
+
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Paysafe 350 &euro;"
+                        data-value="350"
+                        data-price="90"
+                    >
+                        Add to Cart
+                    </button>
+
                 </div>
+
             </div>
+
+
             <div class="shop-card card-paysafe premium">
+
                 <div class="card-glow"></div>
+
                 <div class="card-inner">
-                    <div class="card-brand">paysafe</div>
-                    <div class="card-value">800 &euro;</div>
-                    <div class="card-price">Purchase for: <span>220 &euro;</span></div>
-                    <button class="btn-secondary add-to-cart" data-title="Paysafe 800 &euro;" data-value="800" data-price="220">Add to Cart</button>
+
+                    <div class="card-brand">
+                        paysafe
+                    </div>
+
+                    <div class="card-value">
+                        800 &euro;
+                    </div>
+
+                    <div class="card-price">
+                        Purchase for:
+                        <span>220 &euro;</span>
+                    </div>
+
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Paysafe 800 &euro;"
+                        data-value="800"
+                        data-price="220"
+                    >
+                        Add to Cart
+                    </button>
+
                 </div>
+
             </div>
+
+
             <div class="shop-card card-paysafe elite">
+
                 <div class="card-glow"></div>
+
                 <div class="card-inner">
-                    <div class="card-brand">paysafe</div>
-                    <div class="card-value">1800 &euro;</div>
-                    <div class="card-price">Purchase for: <span>450 &euro;</span></div>
-                    <button class="btn-secondary add-to-cart" data-title="Paysafe 1800 &euro;" data-value="1800" data-price="450">Add to Cart</button>
+
+                    <div class="card-brand">
+                        paysafe
+                    </div>
+
+                    <div class="card-value">
+                        1800 &euro;
+                    </div>
+
+                    <div class="card-price">
+                        Purchase for:
+                        <span>450 &euro;</span>
+                    </div>
+
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Paysafe 1800 &euro;"
+                        data-value="1800"
+                        data-price="450"
+                    >
+                        Add to Cart
+                    </button>
+
                 </div>
+
             </div>
+
         </div>
+
     </section>
 
+
+    <!-- About -->
     <section class="about-section" id="about">
+
         <div class="about-content">
-            <h2>About GrekoLounge</h2>
-            <p>Welcome to GrekoLounge, your premier destination for high-value gift cards at unbeatable rates. We pride ourselves on offering exclusive deals that allow you to maximize your purchasing power securely and instantly. Experience the difference with our elite service and dedicated support.</p>
+
+            <h2>
+                About GrekoLounge
+            </h2>
+
+            <p>
+                Welcome to GrekoLounge, your premier destination
+                for high-value gift cards at unbeatable rates.
+                We pride ourselves on offering exclusive deals
+                that allow you to maximize your purchasing power
+                securely and instantly. Experience the difference
+                with our elite service and dedicated support.
+            </p>
+
         </div>
+
     </section>
 
+
+    <!-- Footer -->
     <footer>
+
         <div class="footer-content">
-            <div class="logo">Greko<span>Lounge</span></div>
-            <p>Exclusive Premium Gift Cards.</p>
-            <p class="copyright">&copy; 2026 GrekoLounge. All rights reserved.</p>
+
+            <div class="logo">
+                Greko<span>Lounge</span>
+            </div>
+
+            <p>
+                Exclusive Premium Gift Cards.
+            </p>
+
+            <p class="copyright">
+                &copy; 2026 GrekoLounge. All rights reserved.
+            </p>
+
         </div>
+
     </footer>
 
+
     <script src="script.js"></script>
+
 </body>
 </html>
