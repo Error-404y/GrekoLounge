@@ -1,2253 +1,1319 @@
-document.addEventListener('DOMContentLoaded', () => {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    /* =========================================================
-       SUPABASE CONFIGURATION
-    ========================================================== */
+    <title>GrekoLounge | Premium Gift Cards</title>
 
-    const SUPABASE_URL =
-        'https://vsjrqeaubmoxjzlklzbg.supabase.co';
+    <link rel="stylesheet" href="styles.css">
 
-    const SUPABASE_PUBLISHABLE_KEY =
-        'sb_publishable_jaQjrYZSve2__Pw5594YEg_R_ou42Sm';
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+</head>
 
+<body>
 
-    if (
-        !window.supabase ||
-        typeof window.supabase.createClient !== 'function'
-    ) {
-        console.error(
-            'GrekoLounge: Supabase library could not be loaded.'
-        );
-        return;
-    }
+    <!-- =========================================================
+         NAVBAR
+    ========================================================== -->
 
+    <nav class="navbar">
 
-    const supabaseClient =
-        window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_PUBLISHABLE_KEY
-        );
+        <div class="logo">
+            Greko<span>Lounge</span>
+        </div>
 
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#shop">Shop</a></li>
+            <li><a href="#about">About</a></li>
+        </ul>
 
-    /* =========================================================
-       CONFIGURATION
-    ========================================================== */
+        <button class="btn-primary cart-button" id="cartBtn">
+            Cart
+            <span class="cart-badge" id="cartBadge">0</span>
+        </button>
 
-    const MINIMUM_ORDER = 100;
+    </nav>
 
-    /*
-     * Discord webhook is NEVER stored in this file.
-     *
-     * The webhook is stored securely as a Supabase
-     * Edge Function secret.
-     */
 
-    const DISCORD_FUNCTION_URL =
-        `${SUPABASE_URL}/functions/v1/dynamic-handler`;
+    <!-- =========================================================
+         CART
+    ========================================================== -->
 
+    <div class="cart-overlay" id="cartOverlay">
 
-    /* =========================================================
-       STATE
-    ========================================================== */
+        <div class="cart-modal">
 
-    let cart = [];
+            <div class="cart-header">
 
-    let toastTimeout = null;
+                <div>
+                    <h3>Your Cart</h3>
+                    <span class="cart-subtitle" id="cartSubtitle">
+                        0 items
+                    </span>
+                </div>
 
+                <button
+                    class="close-cart"
+                    id="closeCart"
+                    aria-label="Close cart"
+                >
+                    &times;
+                </button>
 
-    /* =========================================================
-       ELEMENTS
-    ========================================================== */
+            </div>
 
-    const cartBtn =
-        document.getElementById('cartBtn');
 
-    const cartBadge =
-        document.getElementById('cartBadge');
+            <!-- Minimum Order Progress -->
 
-    const cartOverlay =
-        document.getElementById('cartOverlay');
+            <div class="minimum-order">
 
-    const closeCartBtn =
-        document.getElementById('closeCart');
+                <div class="minimum-order-header">
+                    <span>Minimum Order</span>
+                    <strong id="minimumOrderText">
+                        100 €
+                    </strong>
+                </div>
 
-    const cartItemsContainer =
-        document.getElementById('cartItems');
+                <div class="progress-track">
+                    <div
+                        class="progress-bar"
+                        id="minimumProgress"
+                    ></div>
+                </div>
 
-    const cartTotalEl =
-        document.getElementById('cartTotal');
+                <p id="minimumOrderMessage">
+                    Add items worth at least 100 € to continue.
+                </p>
 
-    const cartItemCountEl =
-        document.getElementById('cartItemCount');
+            </div>
 
-    const cartSubtitle =
-        document.getElementById('cartSubtitle');
 
-    const checkoutBtn =
-        document.getElementById('checkoutBtn');
+            <!-- Cart Items -->
 
-    const checkoutOverlay =
-        document.getElementById('checkoutOverlay');
-
-    const checkoutClose =
-        document.getElementById('checkoutClose');
-
-    const checkoutCancel =
-        document.getElementById('checkoutCancel');
-
-    const checkoutConfirm =
-        document.getElementById('checkoutConfirm');
-
-    const checkoutUsername =
-        document.getElementById('checkoutUsername');
-
-    const checkoutEmail =
-        document.getElementById('checkoutEmail');
-
-    const usernameError =
-        document.getElementById('usernameError');
-
-    const emailError =
-        document.getElementById('emailError');
-
-    const checkoutError =
-        document.getElementById('checkoutError');
-
-    const checkoutSummaryItems =
-        document.getElementById('checkoutSummaryItems');
-
-    const checkoutSummaryTotal =
-        document.getElementById('checkoutSummaryTotal');
-
-    const checkoutSummaryCount =
-        document.getElementById('checkoutSummaryCount');
-
-    const toastMessage =
-        document.getElementById('toastMessage');
-
-    const minimumProgress =
-        document.getElementById('minimumProgress');
-
-    const minimumOrderMessage =
-        document.getElementById('minimumOrderMessage');
-
-    const minimumOrderBox =
-        document.querySelector('.minimum-order');
-
-    const minimumOverlay =
-        document.getElementById('minimumOverlay');
-
-    const minimumContinue =
-        document.getElementById('minimumContinue');
-
-    const minimumCurrentTotal =
-        document.getElementById('minimumCurrentTotal');
-
-    const minimumRemaining =
-        document.getElementById('minimumRemaining');
-
-    const statusOverlay =
-        document.getElementById('statusOverlay');
-
-    const statusClose =
-        document.getElementById('statusClose');
-
-    const successOrderReference =
-        document.getElementById('successOrderReference');
-
-    const successOrderTotal =
-        document.getElementById('successOrderTotal');
-
-    const addToCartBtns =
-        document.querySelectorAll('.add-to-cart');
-
-
-    /* =========================================================
-       HELPERS
-    ========================================================== */
-
-    function formatEuro(value) {
-
-        const number =
-            Number(value) || 0;
-
-        return number.toLocaleString(
-            'en-GB',
-            {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 2
-            }
-        );
-
-    }
-
-
-    function escapeHtml(value) {
-
-        return String(value ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-
-    }
-
-
-    function getCartTotal() {
-
-        return cart.reduce(
-            (sum, item) => {
-
-                const price =
-                    Number(item.price) || 0;
-
-                const quantity =
-                    Number(item.quantity) || 0;
-
-                return sum + price * quantity;
-
-            },
-            0
-        );
-
-    }
-
-
-    function getCartItemCount() {
-
-        return cart.reduce(
-            (sum, item) => {
-
-                return sum +
-                    (Number(item.quantity) || 0);
-
-            },
-            0
-        );
-
-    }
-
-
-    function generateOrderId() {
-
-        const now =
-            new Date();
-
-        const random =
-            Math.random()
-                .toString(36)
-                .substring(2, 8)
-                .toUpperCase();
-
-        return (
-            `GL-${now.getFullYear()}` +
-            `${String(
-                now.getMonth() + 1
-            ).padStart(2, '0')}` +
-            `${String(
-                now.getDate()
-            ).padStart(2, '0')}-` +
-            `${random}`
-        );
-
-    }
-
-
-    function lockBody() {
-
-        document.body.style.overflow =
-            'hidden';
-
-    }
-
-
-    function unlockBody() {
-
-        const activeModal =
-            document.querySelector(
-                '.cart-overlay.active,' +
-                '.checkout-overlay.active,' +
-                '.minimum-overlay.active,' +
-                '.status-overlay.active'
-            );
-
-        if (!activeModal) {
-
-            document.body.style.overflow =
-                '';
-
-        }
-
-    }
-
-
-    /* =========================================================
-       TOAST
-    ========================================================== */
-
-    function showToast(message) {
-
-        if (!toastMessage) {
-            return;
-        }
-
-        clearTimeout(toastTimeout);
-
-        toastMessage.textContent =
-            message;
-
-        toastMessage.classList.remove(
-            'show'
-        );
-
-        void toastMessage.offsetWidth;
-
-        toastMessage.classList.add(
-            'show'
-        );
-
-        toastTimeout =
-            setTimeout(() => {
-
-                toastMessage.classList.remove(
-                    'show'
-                );
-
-            }, 3000);
-
-    }
-
-
-    /* =========================================================
-       MODALS
-    ========================================================== */
-
-    function openCart() {
-
-        if (!cartOverlay) {
-            return;
-        }
-
-        cartOverlay.classList.add('active');
-
-        lockBody();
-
-    }
-
-
-    function closeCart() {
-
-        if (!cartOverlay) {
-            return;
-        }
-
-        cartOverlay.classList.remove('active');
-
-        unlockBody();
-
-    }
-
-
-    function openCheckout() {
-
-        if (!checkoutOverlay) {
-            return;
-        }
-
-        updateCheckoutSummary();
-
-        checkoutOverlay.classList.add('active');
-
-        lockBody();
-
-        setTimeout(() => {
-
-            if (checkoutUsername) {
-                checkoutUsername.focus();
-            }
-
-        }, 100);
-
-    }
-
-
-    function closeCheckout() {
-
-        if (!checkoutOverlay) {
-            return;
-        }
-
-        checkoutOverlay.classList.remove('active');
-
-        clearCheckoutErrors();
-
-        unlockBody();
-
-    }
-
-
-    function openMinimumModal() {
-
-        if (!minimumOverlay) {
-            return;
-        }
-
-        const total =
-            getCartTotal();
-
-        const remaining =
-            Math.max(
-                0,
-                MINIMUM_ORDER - total
-            );
-
-
-        if (minimumCurrentTotal) {
-
-            minimumCurrentTotal.textContent =
-                formatEuro(total);
-
-        }
-
-
-        if (minimumRemaining) {
-
-            minimumRemaining.textContent =
-                formatEuro(remaining);
-
-        }
-
-
-        minimumOverlay.classList.add('active');
-
-        lockBody();
-
-    }
-
-
-    function closeMinimumModal() {
-
-        if (!minimumOverlay) {
-            return;
-        }
-
-        minimumOverlay.classList.remove('active');
-
-        unlockBody();
-
-    }
-
-
-    function openStatusModal(orderId, total) {
-
-        if (!statusOverlay) {
-            return;
-        }
-
-
-        if (successOrderReference) {
-
-            successOrderReference.textContent =
-                orderId;
-
-        }
-
-
-        if (successOrderTotal) {
-
-            successOrderTotal.textContent =
-                formatEuro(total);
-
-        }
-
-
-        statusOverlay.classList.add('active');
-
-        lockBody();
-
-    }
-
-
-    function closeStatusModal() {
-
-        if (!statusOverlay) {
-            return;
-        }
-
-        statusOverlay.classList.remove('active');
-
-        unlockBody();
-
-    }
-
-
-    /* =========================================================
-       MODAL EVENTS
-    ========================================================== */
-
-    if (cartBtn) {
-
-        cartBtn.addEventListener(
-            'click',
-            openCart
-        );
-
-    }
-
-
-    if (closeCartBtn) {
-
-        closeCartBtn.addEventListener(
-            'click',
-            closeCart
-        );
-
-    }
-
-
-    if (cartOverlay) {
-
-        cartOverlay.addEventListener(
-            'click',
-            event => {
-
-                if (
-                    event.target === cartOverlay
-                ) {
-
-                    closeCart();
-
-                }
-
-            }
-        );
-
-    }
-
-
-    if (checkoutClose) {
-
-        checkoutClose.addEventListener(
-            'click',
-            closeCheckout
-        );
-
-    }
-
-
-    if (checkoutCancel) {
-
-        checkoutCancel.addEventListener(
-            'click',
-            closeCheckout
-        );
-
-    }
-
-
-    if (checkoutOverlay) {
-
-        checkoutOverlay.addEventListener(
-            'click',
-            event => {
-
-                if (
-                    event.target === checkoutOverlay
-                ) {
-
-                    closeCheckout();
-
-                }
-
-            }
-        );
-
-    }
-
-
-    if (minimumContinue) {
-
-        minimumContinue.addEventListener(
-            'click',
-            closeMinimumModal
-        );
-
-    }
-
-
-    if (minimumOverlay) {
-
-        minimumOverlay.addEventListener(
-            'click',
-            event => {
-
-                if (
-                    event.target === minimumOverlay
-                ) {
-
-                    closeMinimumModal();
-
-                }
-
-            }
-        );
-
-    }
-
-
-    if (statusClose) {
-
-        statusClose.addEventListener(
-            'click',
-            closeStatusModal
-        );
-
-    }
-
-
-    if (statusOverlay) {
-
-        statusOverlay.addEventListener(
-            'click',
-            event => {
-
-                if (
-                    event.target === statusOverlay
-                ) {
-
-                    closeStatusModal();
-
-                }
-
-            }
-        );
-
-    }
-
-
-    document.addEventListener(
-        'keydown',
-        event => {
-
-            if (event.key !== 'Escape') {
-                return;
-            }
-
-            closeCart();
-            closeCheckout();
-            closeMinimumModal();
-            closeStatusModal();
-
-        }
-    );
-
-
-    /* =========================================================
-       ADD TO CART
-    ========================================================== */
-
-    addToCartBtns.forEach(button => {
-
-        button.addEventListener(
-            'click',
-            () => {
-
-                const title =
-                    button.getAttribute(
-                        'data-title'
-                    );
-
-                const price =
-                    Number(
-                        button.getAttribute(
-                            'data-price'
-                        )
-                    );
-
-                const value =
-                    Number(
-                        button.getAttribute(
-                            'data-value'
-                        )
-                    );
-
-
-                if (
-                    !title ||
-                    !Number.isFinite(price) ||
-                    price <= 0
-                ) {
-
-                    showToast(
-                        'This product could not be added to your cart.'
-                    );
-
-                    return;
-
-                }
-
-
-                const existing =
-                    cart.find(
-                        item =>
-                            item.title === title &&
-                            Number(item.price) === price
-                    );
-
-
-                if (existing) {
-
-                    existing.quantity += 1;
-
-                } else {
-
-                    cart.push({
-
-                        title:
-                            title,
-
-                        price:
-                            price,
-
-                        value:
-                            Number.isFinite(value)
-                                ? value
-                                : 0,
-
-                        quantity:
-                            1
-
-                    });
-
-                }
-
-
-                updateCart();
-
-                animateCartBadge();
-
-
-                const originalText =
-                    button.textContent;
-
-                button.textContent =
-                    'Added';
-
-                button.classList.add(
-                    'added-state'
-                );
-
-
-                setTimeout(() => {
-
-                    button.textContent =
-                        originalText;
-
-                    button.classList.remove(
-                        'added-state'
-                    );
-
-                }, 1200);
-
-
-                showToast(
-                    `${title} added to your cart.`
-                );
-
-            }
-        );
-
-    });
-
-
-    /* =========================================================
-       UPDATE CART
-    ========================================================== */
-
-    function updateCart() {
-
-        const total =
-            getCartTotal();
-
-        const itemCount =
-            getCartItemCount();
-
-
-        if (cartBadge) {
-
-            cartBadge.textContent =
-                itemCount;
-
-        }
-
-
-        if (cartSubtitle) {
-
-            cartSubtitle.textContent =
-                `${itemCount} ${
-                    itemCount === 1
-                        ? 'item'
-                        : 'items'
-                }`;
-
-        }
-
-
-        if (cartItemCountEl) {
-
-            cartItemCountEl.textContent =
-                itemCount;
-
-        }
-
-
-        if (cartTotalEl) {
-
-            cartTotalEl.textContent =
-                formatEuro(total);
-
-        }
-
-
-        updateMinimumProgress(total);
-
-
-        if (checkoutBtn) {
-
-            checkoutBtn.disabled =
-                cart.length === 0 ||
-                total < MINIMUM_ORDER;
-
-        }
-
-
-        if (!cartItemsContainer) {
-            return;
-        }
-
-
-        if (cart.length === 0) {
-
-            cartItemsContainer.innerHTML = `
+            <div
+                class="cart-items"
+                id="cartItems"
+            >
                 <div class="empty-cart">
                     <div class="empty-cart-title">
                         Your cart is empty
                     </div>
+
                     <p>
                         Select a gift card to get started.
                     </p>
                 </div>
-            `;
-
-            return;
-
-        }
+            </div>
 
 
-        cartItemsContainer.innerHTML = '';
+            <!-- Cart Footer -->
+
+            <div class="cart-footer">
+
+                <div class="cart-summary-row">
+                    <span>Items</span>
+                    <span id="cartItemCount">0</span>
+                </div>
+
+                <div class="cart-summary-row total-row">
+                    <span>Total</span>
+
+                    <span>
+                        <strong id="cartTotal">0</strong> €
+                    </span>
+                </div>
+
+                <button
+                    class="btn-primary checkout-btn"
+                    id="checkoutBtn"
+                    disabled
+                >
+                    Proceed to Checkout
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
 
 
-        cart.forEach(
-            (item, index) => {
+    <!-- =========================================================
+         CHECKOUT MODAL
+    ========================================================== -->
 
-                const quantity =
-                    Number(item.quantity) || 0;
+    <div
+        class="checkout-overlay"
+        id="checkoutOverlay"
+    >
 
-                const price =
-                    Number(item.price) || 0;
+        <div class="checkout-modal">
 
-                const itemTotal =
-                    quantity * price;
+            <div class="modal-top">
+
+                <div>
+                    <span class="modal-eyebrow">
+                        ORDER REQUEST
+                    </span>
+
+                    <h3>
+                        Complete Your Order
+                    </h3>
+                </div>
+
+                <button
+                    class="modal-close"
+                    id="checkoutClose"
+                    aria-label="Close checkout"
+                >
+                    &times;
+                </button>
+
+            </div>
 
 
-                const itemEl =
-                    document.createElement('div');
+            <p class="checkout-description">
+                Enter your information below to submit your order
+                for review.
+            </p>
 
-                itemEl.className =
-                    'cart-item';
+
+            <!-- Checkout Summary -->
+
+            <div class="checkout-summary">
+
+                <div class="checkout-summary-header">
+                    <span>Order Summary</span>
+
+                    <span id="checkoutSummaryCount">
+                        0 items
+                    </span>
+                </div>
+
+                <div
+                    class="checkout-summary-items"
+                    id="checkoutSummaryItems"
+                ></div>
+
+                <div class="checkout-summary-total">
+                    <span>Total</span>
+
+                    <strong>
+                        <span id="checkoutSummaryTotal">0</span> €
+                    </strong>
+                </div>
+
+            </div>
 
 
-                itemEl.innerHTML = `
+            <!-- Form -->
 
-                    <div class="cart-item-info">
+            <div class="form-group">
 
-                        <h4>
-                            ${escapeHtml(item.title)}
-                        </h4>
+                <label for="checkoutUsername">
+                    Username
+                </label>
 
-                        <p>
-                            ${formatEuro(itemTotal)} €
-                        </p>
+                <input
+                    type="text"
+                    id="checkoutUsername"
+                    placeholder="Enter your username"
+                    autocomplete="username"
+                >
 
-                        <div class="cart-item-meta">
-                            ${formatEuro(price)} € per item
-                        </div>
+                <small
+                    class="field-error"
+                    id="usernameError"
+                ></small>
 
-                        <div class="cart-item-controls">
+            </div>
 
-                            <button
-                                class="quantity-btn"
-                                data-action="decrease"
-                                data-index="${index}"
-                                aria-label="Decrease quantity"
-                            >
-                                −
-                            </button>
 
-                            <span class="quantity-value">
-                                ${quantity}
-                            </span>
+            <div class="form-group">
 
-                            <button
-                                class="quantity-btn"
-                                data-action="increase"
-                                data-index="${index}"
-                                aria-label="Increase quantity"
-                            >
-                                +
-                            </button>
+                <label for="checkoutEmail">
+                    Email Address
+                </label>
 
-                        </div>
+                <input
+                    type="email"
+                    id="checkoutEmail"
+                    placeholder="Enter your email address"
+                    autocomplete="email"
+                >
 
+                <small
+                    class="field-error"
+                    id="emailError"
+                ></small>
+
+            </div>
+
+
+            <div
+                class="checkout-error"
+                id="checkoutError"
+            ></div>
+
+
+            <div class="checkout-actions">
+
+                <button
+                    class="btn-secondary checkout-cancel"
+                    id="checkoutCancel"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    class="btn-primary"
+                    id="checkoutConfirm"
+                >
+                    Submit Order
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         ORDER SUCCESS / STATUS MODAL
+    ========================================================== -->
+
+    <div
+        class="status-overlay"
+        id="statusOverlay"
+    >
+
+        <div class="status-modal">
+
+            <div class="status-icon">
+                ✓
+            </div>
+
+            <span class="modal-eyebrow">
+                ORDER RECEIVED
+            </span>
+
+            <h3>
+                Your Order Has Been Submitted
+            </h3>
+
+            <p class="status-description">
+                Your order has been successfully submitted
+                and is currently pending review by our team.
+            </p>
+
+
+            <div class="order-reference-box">
+
+                <span>
+                    ORDER REFERENCE
+                </span>
+
+                <strong id="successOrderReference">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div class="status-information">
+
+                <div>
+                    <span>Status</span>
+                    <strong class="pending-status">
+                        Pending Review
+                    </strong>
+                </div>
+
+                <div>
+                    <span>Total</span>
+                    <strong>
+                        <span id="successOrderTotal">0</span> €
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <p class="status-next-step">
+                Please keep your order reference for future
+                communication regarding your order.
+            </p>
+
+
+            <button
+                class="btn-primary status-close"
+                id="statusClose"
+            >
+                Continue Shopping
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         MINIMUM ORDER MODAL
+    ========================================================== -->
+
+    <div
+        class="minimum-overlay"
+        id="minimumOverlay"
+    >
+
+        <div class="minimum-modal">
+
+            <div class="minimum-modal-icon">
+                !
+            </div>
+
+            <span class="modal-eyebrow">
+                MINIMUM ORDER
+            </span>
+
+            <h3>
+                Minimum Order Not Reached
+            </h3>
+
+            <p>
+                The minimum order value is
+                <strong>100 €</strong>.
+                Please add additional items to your cart
+                before continuing to checkout.
+            </p>
+
+            <div class="minimum-modal-total">
+
+                <div>
+                    <span>Current total</span>
+                    <strong>
+                        <span id="minimumCurrentTotal">0</span> €
+                    </strong>
+                </div>
+
+                <div>
+                    <span>Still required</span>
+                    <strong>
+                        <span id="minimumRemaining">100</span> €
+                    </strong>
+                </div>
+
+            </div>
+
+            <button
+                class="btn-primary"
+                id="minimumContinue"
+            >
+                Continue Shopping
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         TOAST
+    ========================================================== -->
+
+    <div
+        class="toast-message"
+        id="toastMessage"
+    ></div>
+
+
+    <!-- =========================================================
+         HERO
+    ========================================================== -->
+
+    <header
+        class="hero"
+        id="home"
+    >
+
+        <div class="hero-content">
+
+            <span class="hero-eyebrow">
+                PREMIUM GIFT CARDS
+            </span>
+
+            <h1>
+                Unlock Unlimited Value
+            </h1>
+
+            <p>
+                Premium gift cards at exclusive rates.
+                Elevate your shopping experience today.
+            </p>
+
+            <a
+                href="#shop"
+                class="btn-primary hero-btn"
+            >
+                Explore Cards
+            </a>
+
+        </div>
+
+        <div class="hero-background"></div>
+
+    </header>
+
+
+    <!-- =========================================================
+         SHOP
+    ========================================================== -->
+
+    <section
+        class="shop-section"
+        id="shop"
+    >
+
+        <div class="section-header">
+
+            <span class="section-eyebrow">
+                OUR COLLECTION
+            </span>
+
+            <h2>
+                Select Your Brand
+            </h2>
+
+            <p>
+                Choose your preferred gift card below.
+            </p>
+
+        </div>
+
+
+        <!-- =====================================================
+             AMAZON
+        ====================================================== -->
+
+        <h3 class="brand-title">
+            Amazon
+        </h3>
+
+        <div class="card-grid">
+
+
+            <!-- Amazon 350 -->
+
+            <div
+                class="shop-card"
+                data-brand="Amazon"
+                data-badge="Popular"
+            >
+
+                <div class="card-badge">
+                    Popular
+                </div>
+
+                <div class="card-glow"></div>
+
+                <div class="card-inner">
+
+                    <div class="card-brand">
+                        amazon
+                    </div>
+
+                    <div class="card-value">
+                        350 €
+                    </div>
+
+                    <div class="card-price">
+                        Purchase for:
+                        <span>70 €</span>
+                    </div>
+
+                    <div class="card-saving">
+                        Save 280 €
                     </div>
 
                     <button
-                        class="remove-item"
-                        data-action="remove"
-                        data-index="${index}"
+                        class="btn-secondary add-to-cart"
+                        data-title="Amazon 350 €"
+                        data-value="350"
+                        data-price="70"
                     >
-                        Remove
+                        Add to Cart
                     </button>
-                `;
 
+                </div>
 
-                cartItemsContainer.appendChild(
-                    itemEl
-                );
+            </div>
 
-            }
-        );
 
-    }
+            <!-- Amazon 800 -->
 
+            <div
+                class="shop-card premium"
+                data-brand="Amazon"
+                data-badge="Premium"
+            >
 
-    /* =========================================================
-       CART CONTROLS
-    ========================================================== */
+                <div class="card-badge">
+                    Premium
+                </div>
 
-    if (cartItemsContainer) {
+                <div class="card-glow"></div>
 
-        cartItemsContainer.addEventListener(
-            'click',
-            event => {
+                <div class="card-inner">
 
-                const button =
-                    event.target.closest('button');
+                    <div class="card-brand">
+                        amazon
+                    </div>
 
-                if (!button) {
-                    return;
-                }
+                    <div class="card-value">
+                        800 €
+                    </div>
 
+                    <div class="card-price">
+                        Purchase for:
+                        <span>180 €</span>
+                    </div>
 
-                const index =
-                    Number(
-                        button.getAttribute(
-                            'data-index'
-                        )
-                    );
+                    <div class="card-saving">
+                        Save 620 €
+                    </div>
 
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Amazon 800 €"
+                        data-value="800"
+                        data-price="180"
+                    >
+                        Add to Cart
+                    </button>
 
-                if (
-                    !Number.isInteger(index) ||
-                    !cart[index]
-                ) {
+                </div>
 
-                    return;
+            </div>
 
-                }
 
+            <!-- Amazon 1800 -->
 
-                const action =
-                    button.getAttribute(
-                        'data-action'
-                    );
+            <div
+                class="shop-card elite"
+                data-brand="Amazon"
+                data-badge="Best Value"
+            >
 
+                <div class="card-badge">
+                    Best Value
+                </div>
 
-                if (action === 'increase') {
+                <div class="card-glow"></div>
 
-                    cart[index].quantity += 1;
+                <div class="card-inner">
 
-                    updateCart();
+                    <div class="card-brand">
+                        amazon
+                    </div>
 
-                    animateCartBadge();
+                    <div class="card-value">
+                        1800 €
+                    </div>
 
-                    return;
+                    <div class="card-price">
+                        Purchase for:
+                        <span>380 €</span>
+                    </div>
 
-                }
+                    <div class="card-saving">
+                        Save 1420 €
+                    </div>
 
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Amazon 1800 €"
+                        data-value="1800"
+                        data-price="380"
+                    >
+                        Add to Cart
+                    </button>
 
-                if (action === 'decrease') {
+                </div>
 
-                    cart[index].quantity -= 1;
+            </div>
 
+        </div>
 
-                    if (
-                        cart[index].quantity <= 0
-                    ) {
 
-                        cart.splice(index, 1);
+        <!-- =====================================================
+             GOOGLE PLAY
+        ====================================================== -->
 
-                    }
+        <h3
+            class="brand-title"
+            style="margin-top: 5rem;"
+        >
+            Google Play
+        </h3>
 
+        <div class="card-grid">
 
-                    updateCart();
 
-                    animateCartBadge();
+            <div
+                class="shop-card card-google"
+                data-brand="Google Play"
+                data-badge="Popular"
+            >
 
-                    return;
+                <div class="card-badge">
+                    Popular
+                </div>
 
-                }
+                <div class="card-glow"></div>
 
+                <div class="card-inner">
 
-                if (action === 'remove') {
+                    <div class="card-brand">
+                        google play
+                    </div>
 
-                    const removedItem =
-                        cart[index];
+                    <div class="card-value">
+                        350 €
+                    </div>
 
+                    <div class="card-price">
+                        Purchase for:
+                        <span>80 €</span>
+                    </div>
 
-                    cart.splice(index, 1);
+                    <div class="card-saving">
+                        Save 270 €
+                    </div>
 
-                    updateCart();
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Google Play 350 €"
+                        data-value="350"
+                        data-price="80"
+                    >
+                        Add to Cart
+                    </button>
 
-                    animateCartBadge();
+                </div>
 
+            </div>
 
-                    showToast(
-                        `${removedItem.title} removed from your cart.`
-                    );
 
-                }
+            <div
+                class="shop-card card-google premium"
+                data-brand="Google Play"
+                data-badge="Premium"
+            >
 
-            }
-        );
+                <div class="card-badge">
+                    Premium
+                </div>
 
-    }
+                <div class="card-glow"></div>
 
+                <div class="card-inner">
 
-    /* =========================================================
-       MINIMUM ORDER
-    ========================================================== */
+                    <div class="card-brand">
+                        google play
+                    </div>
 
-    function updateMinimumProgress(total) {
+                    <div class="card-value">
+                        800 €
+                    </div>
 
-        if (
-            !minimumProgress ||
-            !minimumOrderMessage ||
-            !minimumOrderBox
-        ) {
+                    <div class="card-price">
+                        Purchase for:
+                        <span>250 €</span>
+                    </div>
 
-            return;
+                    <div class="card-saving">
+                        Save 550 €
+                    </div>
 
-        }
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Google Play 800 €"
+                        data-value="800"
+                        data-price="250"
+                    >
+                        Add to Cart
+                    </button>
 
+                </div>
 
-        const percentage =
-            Math.min(
-                (total / MINIMUM_ORDER) * 100,
-                100
-            );
+            </div>
 
 
-        minimumProgress.style.width =
-            `${percentage}%`;
+            <div
+                class="shop-card card-google elite"
+                data-brand="Google Play"
+                data-badge="Best Value"
+            >
 
+                <div class="card-badge">
+                    Best Value
+                </div>
 
-        if (total >= MINIMUM_ORDER) {
+                <div class="card-glow"></div>
 
-            minimumProgress.classList.add('complete');
+                <div class="card-inner">
 
-            minimumOrderBox.classList.add('complete');
+                    <div class="card-brand">
+                        google play
+                    </div>
 
-            minimumOrderMessage.textContent =
-                'Minimum order reached. You can proceed to checkout.';
+                    <div class="card-value">
+                        1800 €
+                    </div>
 
-        } else {
+                    <div class="card-price">
+                        Purchase for:
+                        <span>450 €</span>
+                    </div>
 
-            minimumProgress.classList.remove('complete');
+                    <div class="card-saving">
+                        Save 1350 €
+                    </div>
 
-            minimumOrderBox.classList.remove('complete');
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Google Play 1800 €"
+                        data-value="1800"
+                        data-price="450"
+                    >
+                        Add to Cart
+                    </button>
 
+                </div>
 
-            const remaining =
-                MINIMUM_ORDER - total;
+            </div>
 
+        </div>
 
-            minimumOrderMessage.textContent =
-                `Add ${formatEuro(remaining)} € more to reach the minimum order.`;
 
-        }
+        <!-- =====================================================
+             APPLE
+        ====================================================== -->
 
-    }
+        <h3
+            class="brand-title"
+            style="margin-top: 5rem;"
+        >
+            Apple
+        </h3>
 
+        <div class="card-grid">
 
-    /* =========================================================
-       CART BADGE ANIMATION
-    ========================================================== */
+            <div
+                class="shop-card card-apple"
+                data-brand="Apple"
+                data-badge="Popular"
+            >
 
-    function animateCartBadge() {
+                <div class="card-badge">
+                    Popular
+                </div>
 
-        if (!cartBadge) {
-            return;
-        }
+                <div class="card-glow"></div>
 
-        cartBadge.classList.remove('bump');
+                <div class="card-inner">
 
-        void cartBadge.offsetWidth;
+                    <div class="card-brand">
+                        apple
+                    </div>
 
-        cartBadge.classList.add('bump');
+                    <div class="card-value">
+                        350 €
+                    </div>
 
-    }
+                    <div class="card-price">
+                        Purchase for:
+                        <span>80 €</span>
+                    </div>
 
+                    <div class="card-saving">
+                        Save 270 €
+                    </div>
 
-    /* =========================================================
-       CHECKOUT
-    ========================================================== */
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Apple 350 €"
+                        data-value="350"
+                        data-price="80"
+                    >
+                        Add to Cart
+                    </button>
 
-    if (checkoutBtn) {
+                </div>
 
-        checkoutBtn.addEventListener(
-            'click',
-            () => {
+            </div>
 
-                const total =
-                    getCartTotal();
 
+            <div
+                class="shop-card card-apple premium"
+                data-brand="Apple"
+                data-badge="Premium"
+            >
 
-                if (cart.length === 0) {
+                <div class="card-badge">
+                    Premium
+                </div>
 
-                    showToast(
-                        'Your cart is empty.'
-                    );
+                <div class="card-glow"></div>
 
-                    return;
+                <div class="card-inner">
 
-                }
+                    <div class="card-brand">
+                        apple
+                    </div>
 
+                    <div class="card-value">
+                        800 €
+                    </div>
 
-                if (total < MINIMUM_ORDER) {
+                    <div class="card-price">
+                        Purchase for:
+                        <span>200 €</span>
+                    </div>
 
-                    openMinimumModal();
+                    <div class="card-saving">
+                        Save 600 €
+                    </div>
 
-                    return;
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Apple 800 €"
+                        data-value="800"
+                        data-price="200"
+                    >
+                        Add to Cart
+                    </button>
 
-                }
+                </div>
 
+            </div>
 
-                closeCart();
 
-                openCheckout();
+            <div
+                class="shop-card card-apple elite"
+                data-brand="Apple"
+                data-badge="Best Value"
+            >
 
-            }
-        );
+                <div class="card-badge">
+                    Best Value
+                </div>
 
-    }
+                <div class="card-glow"></div>
 
+                <div class="card-inner">
 
-    /* =========================================================
-       CHECKOUT SUMMARY
-    ========================================================== */
+                    <div class="card-brand">
+                        apple
+                    </div>
 
-    function updateCheckoutSummary() {
+                    <div class="card-value">
+                        1800 €
+                    </div>
 
-        if (
-            !checkoutSummaryItems ||
-            !checkoutSummaryCount ||
-            !checkoutSummaryTotal
-        ) {
+                    <div class="card-price">
+                        Purchase for:
+                        <span>430 €</span>
+                    </div>
 
-            return;
+                    <div class="card-saving">
+                        Save 1370 €
+                    </div>
 
-        }
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Apple 1800 €"
+                        data-value="1800"
+                        data-price="430"
+                    >
+                        Add to Cart
+                    </button>
 
+                </div>
 
-        checkoutSummaryItems.innerHTML = '';
+            </div>
 
+        </div>
 
-        const itemCount =
-            getCartItemCount();
 
-        const total =
-            getCartTotal();
+        <!-- =====================================================
+             STEAM
+        ====================================================== -->
 
+        <h3
+            class="brand-title"
+            style="margin-top: 5rem;"
+        >
+            Steam
+        </h3>
 
-        checkoutSummaryCount.textContent =
-            `${itemCount} ${
-                itemCount === 1
-                    ? 'item'
-                    : 'items'
-            }`;
+        <div class="card-grid">
 
+            <div
+                class="shop-card card-steam"
+                data-brand="Steam"
+                data-badge="Popular"
+            >
 
-        checkoutSummaryTotal.textContent =
-            formatEuro(total);
+                <div class="card-badge">
+                    Popular
+                </div>
 
+                <div class="card-glow"></div>
 
-        cart.forEach(item => {
+                <div class="card-inner">
 
-            const quantity =
-                Number(item.quantity) || 0;
+                    <div class="card-brand">
+                        steam
+                    </div>
 
-            const price =
-                Number(item.price) || 0;
+                    <div class="card-value">
+                        350 €
+                    </div>
 
-            const itemTotal =
-                quantity * price;
+                    <div class="card-price">
+                        Purchase for:
+                        <span>70 €</span>
+                    </div>
 
+                    <div class="card-saving">
+                        Save 280 €
+                    </div>
 
-            const row =
-                document.createElement('div');
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Steam 350 €"
+                        data-value="350"
+                        data-price="70"
+                    >
+                        Add to Cart
+                    </button>
 
-            row.className =
-                'checkout-summary-item';
+                </div>
 
+            </div>
 
-            row.innerHTML = `
 
-                <span>
-                    ${escapeHtml(item.title)}
-                    ${
-                        quantity > 1
-                            ? ` × ${quantity}`
-                            : ''
-                    }
-                </span>
+            <div
+                class="shop-card card-steam premium"
+                data-brand="Steam"
+                data-badge="Premium"
+            >
 
-                <span>
-                    ${formatEuro(itemTotal)} €
-                </span>
+                <div class="card-badge">
+                    Premium
+                </div>
 
-            `;
+                <div class="card-glow"></div>
 
+                <div class="card-inner">
 
-            checkoutSummaryItems.appendChild(row);
+                    <div class="card-brand">
+                        steam
+                    </div>
 
-        });
+                    <div class="card-value">
+                        800 €
+                    </div>
 
-    }
+                    <div class="card-price">
+                        Purchase for:
+                        <span>200 €</span>
+                    </div>
 
+                    <div class="card-saving">
+                        Save 600 €
+                    </div>
 
-    /* =========================================================
-       FORM VALIDATION
-    ========================================================== */
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Steam 800 €"
+                        data-value="800"
+                        data-price="200"
+                    >
+                        Add to Cart
+                    </button>
 
-    function clearCheckoutErrors() {
+                </div>
 
-        if (usernameError) {
-            usernameError.textContent = '';
-        }
+            </div>
 
-        if (emailError) {
-            emailError.textContent = '';
-        }
 
-        if (checkoutError) {
+            <div
+                class="shop-card card-steam elite"
+                data-brand="Steam"
+                data-badge="Best Value"
+            >
 
-            checkoutError.textContent = '';
+                <div class="card-badge">
+                    Best Value
+                </div>
 
-            checkoutError.classList.remove('show');
+                <div class="card-glow"></div>
 
-        }
+                <div class="card-inner">
 
-        if (checkoutUsername) {
+                    <div class="card-brand">
+                        steam
+                    </div>
 
-            checkoutUsername.classList.remove(
-                'input-error'
-            );
+                    <div class="card-value">
+                        1800 €
+                    </div>
 
-        }
+                    <div class="card-price">
+                        Purchase for:
+                        <span>430 €</span>
+                    </div>
 
-        if (checkoutEmail) {
+                    <div class="card-saving">
+                        Save 1370 €
+                    </div>
 
-            checkoutEmail.classList.remove(
-                'input-error'
-            );
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Steam 1800 €"
+                        data-value="1800"
+                        data-price="430"
+                    >
+                        Add to Cart
+                    </button>
 
-        }
+                </div>
 
-    }
+            </div>
 
+        </div>
 
-    function validateCheckout() {
 
-        clearCheckoutErrors();
+        <!-- =====================================================
+             PAYSAFE
+        ====================================================== -->
 
+        <h3
+            class="brand-title"
+            style="margin-top: 5rem;"
+        >
+            Paysafe
+        </h3>
 
-        const username =
-            checkoutUsername
-                ? checkoutUsername.value.trim()
-                : '';
+        <div class="card-grid">
 
+            <div
+                class="shop-card card-paysafe"
+                data-brand="Paysafe"
+                data-badge="Popular"
+            >
 
-        const email =
-            checkoutEmail
-                ? checkoutEmail.value.trim()
-                : '';
+                <div class="card-badge">
+                    Popular
+                </div>
 
+                <div class="card-glow"></div>
 
-        let valid = true;
+                <div class="card-inner">
 
+                    <div class="card-brand">
+                        paysafe
+                    </div>
 
-        if (!username) {
+                    <div class="card-value">
+                        350 €
+                    </div>
 
-            if (usernameError) {
-                usernameError.textContent =
-                    'Please enter your username.';
-            }
+                    <div class="card-price">
+                        Purchase for:
+                        <span>90 €</span>
+                    </div>
 
-            if (checkoutUsername) {
-                checkoutUsername.classList.add(
-                    'input-error'
-                );
-            }
+                    <div class="card-saving">
+                        Save 260 €
+                    </div>
 
-            valid = false;
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Paysafe 350 €"
+                        data-value="350"
+                        data-price="90"
+                    >
+                        Add to Cart
+                    </button>
 
-        } else if (username.length < 2) {
+                </div>
 
-            if (usernameError) {
-                usernameError.textContent =
-                    'Username must contain at least 2 characters.';
-            }
+            </div>
 
-            if (checkoutUsername) {
-                checkoutUsername.classList.add(
-                    'input-error'
-                );
-            }
 
-            valid = false;
+            <div
+                class="shop-card card-paysafe premium"
+                data-brand="Paysafe"
+                data-badge="Premium"
+            >
 
-        } else if (username.length > 100) {
+                <div class="card-badge">
+                    Premium
+                </div>
 
-            if (usernameError) {
-                usernameError.textContent =
-                    'Username is too long.';
-            }
+                <div class="card-glow"></div>
 
-            if (checkoutUsername) {
-                checkoutUsername.classList.add(
-                    'input-error'
-                );
-            }
+                <div class="card-inner">
 
-            valid = false;
+                    <div class="card-brand">
+                        paysafe
+                    </div>
 
-        }
+                    <div class="card-value">
+                        800 €
+                    </div>
 
+                    <div class="card-price">
+                        Purchase for:
+                        <span>220 €</span>
+                    </div>
 
-        const emailPattern =
-            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    <div class="card-saving">
+                        Save 580 €
+                    </div>
 
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Paysafe 800 €"
+                        data-value="800"
+                        data-price="220"
+                    >
+                        Add to Cart
+                    </button>
 
-        if (!email) {
+                </div>
 
-            if (emailError) {
-                emailError.textContent =
-                    'Please enter your email address.';
-            }
+            </div>
 
-            if (checkoutEmail) {
-                checkoutEmail.classList.add(
-                    'input-error'
-                );
-            }
 
-            valid = false;
+            <div
+                class="shop-card card-paysafe elite"
+                data-brand="Paysafe"
+                data-badge="Best Value"
+            >
 
-        } else if (!emailPattern.test(email)) {
+                <div class="card-badge">
+                    Best Value
+                </div>
 
-            if (emailError) {
-                emailError.textContent =
-                    'Please enter a valid email address.';
-            }
+                <div class="card-glow"></div>
 
-            if (checkoutEmail) {
-                checkoutEmail.classList.add(
-                    'input-error'
-                );
-            }
+                <div class="card-inner">
 
-            valid = false;
+                    <div class="card-brand">
+                        paysafe
+                    </div>
 
-        } else if (email.length > 254) {
+                    <div class="card-value">
+                        1800 €
+                    </div>
 
-            if (emailError) {
-                emailError.textContent =
-                    'Email address is too long.';
-            }
+                    <div class="card-price">
+                        Purchase for:
+                        <span>450 €</span>
+                    </div>
 
-            if (checkoutEmail) {
-                checkoutEmail.classList.add(
-                    'input-error'
-                );
-            }
+                    <div class="card-saving">
+                        Save 1350 €
+                    </div>
 
-            valid = false;
+                    <button
+                        class="btn-secondary add-to-cart"
+                        data-title="Paysafe 1800 €"
+                        data-value="1800"
+                        data-price="450"
+                    >
+                        Add to Cart
+                    </button>
 
-        }
+                </div>
 
+            </div>
 
-        return valid;
+        </div>
 
-    }
+    </section>
 
 
-    /* =========================================================
-       ORDER PAYLOAD
-    ========================================================== */
+    <!-- =========================================================
+         ABOUT
+    ========================================================== -->
 
-    function createOrderPayload(
-        orderId,
-        username,
-        email,
-        total
-    ) {
+    <section
+        class="about-section"
+        id="about"
+    >
 
-        const items =
-            cart.map(item => ({
+        <div class="about-content">
 
-                product_name:
-                    String(item.title),
+            <span class="section-eyebrow">
+                ABOUT US
+            </span>
 
-                product_value:
-                    Number(item.value) || 0,
+            <h2>
+                About GrekoLounge
+            </h2>
 
-                unit_price:
-                    Number(item.price) || 0,
+            <p>
+                Welcome to GrekoLounge, your destination for
+                high-value gift cards at competitive rates.
+                Browse our available cards, submit your order,
+                and receive further information after our team
+                reviews your request.
+            </p>
 
-                quantity:
-                    Number(item.quantity) || 0,
+        </div>
 
-                subtotal:
-                    (
-                        Number(item.price) || 0
-                    ) *
-                    (
-                        Number(item.quantity) || 0
-                    )
+    </section>
 
-            }));
 
+    <!-- =========================================================
+         FOOTER
+    ========================================================== -->
 
-        return {
+    <footer>
 
-            order_number:
-                orderId,
+        <div class="footer-content">
 
-            customer_name:
-                username,
+            <div class="logo">
+                Greko<span>Lounge</span>
+            </div>
 
-            customer_email:
-                email,
+            <p>
+                Premium Gift Cards.
+            </p>
 
-            total:
-                total,
+            <p class="copyright">
+                &copy; 2026 GrekoLounge. All rights reserved.
+            </p>
 
-            status:
-                'pending',
+        </div>
 
-            items:
-                items
+    </footer>
 
-        };
 
-    }
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
 
 
-    /* =========================================================
-       CREATE ORDER THROUGH SECURE RPC
-    ========================================================== */
-
-    async function createOrderThroughRPC(
-        orderPayload
-    ) {
-
-        console.log(
-            'GrekoLounge: Creating order through secure RPC...'
-        );
-
-
-        const {
-            data,
-            error
-        } =
-            await supabaseClient.rpc(
-                'create_order_secure',
-                {
-                    p_order_number:
-                        orderPayload.order_number,
-
-                    p_customer_name:
-                        orderPayload.customer_name,
-
-                    p_customer_email:
-                        orderPayload.customer_email,
-
-                    p_total:
-                        orderPayload.total,
-
-                    p_items:
-                        orderPayload.items
-                }
-            );
-
-
-        if (error) {
-
-            console.error(
-                'GrekoLounge: Secure RPC error:',
-                error
-            );
-
-            throw error;
-
-        }
-
-
-        console.log(
-            'GrekoLounge: RPC response:',
-            data
-        );
-
-
-        if (
-            !data ||
-            data.success !== true
-        ) {
-
-            const rpcError =
-                new Error(
-                    data?.error ||
-                    'The order could not be created.'
-                );
-
-            rpcError.code =
-                data?.code ||
-                'ORDER_RPC_FAILED';
-
-            throw rpcError;
-
-        }
-
-
-        return data;
-
-    }
-
-
-    /* =========================================================
-       DISCORD NOTIFICATION
-       
-       IMPORTANT:
-       NEVER put the Discord webhook URL here.
-
-       The browser calls the Supabase Edge Function.
-       The Edge Function reads DISCORD_WEBHOOK_URL
-       from its secure Supabase secret.
-    ========================================================== */
-
-    async function sendOrderToDiscord(
-        orderPayload
-    ) {
-
-        console.log(
-            'GrekoLounge: Sending Discord notification through Edge Function...'
-        );
-
-
-        try {
-
-            const response =
-                await fetch(
-                    DISCORD_FUNCTION_URL,
-                    {
-                        method: 'POST',
-
-                        headers: {
-                            'Authorization':
-                                `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
-
-                            'apikey':
-                                SUPABASE_PUBLISHABLE_KEY,
-
-                            'Content-Type':
-                                'application/json'
-                        },
-
-                        body:
-                            JSON.stringify({
-
-                                order_number:
-                                    orderPayload.order_number,
-
-                                customer_name:
-                                    orderPayload.customer_name,
-
-                                customer_email:
-                                    orderPayload.customer_email,
-
-                                total:
-                                    orderPayload.total,
-
-                                status:
-                                    orderPayload.status ||
-                                    'pending',
-
-                                items:
-                                    orderPayload.items,
-
-                                id:
-                                    orderPayload.id ||
-                                    null
-
-                            })
-                    }
-                );
-
-
-            let result = null;
-
-
-            try {
-
-                result =
-                    await response.json();
-
-            } catch {
-
-                result = null;
-
-            }
-
-
-            console.log(
-                'GrekoLounge: Discord Edge Function response:',
-                result
-            );
-
-
-            if (!response.ok) {
-
-                const error =
-                    new Error(
-                        result?.error ||
-                        `Discord Edge Function returned HTTP ${response.status}`
-                    );
-
-                error.code =
-                    result?.code ||
-                    `HTTP_${response.status}`;
-
-                throw error;
-
-            }
-
-
-            if (
-                result &&
-                result.success === false
-            ) {
-
-                const error =
-                    new Error(
-                        result.error ||
-                        'Discord notification failed.'
-                    );
-
-                error.code =
-                    result.code ||
-                    'DISCORD_NOTIFICATION_FAILED';
-
-                throw error;
-
-            }
-
-
-            console.log(
-                'GrekoLounge: Discord notification sent successfully.'
-            );
-
-
-            return {
-                success: true,
-                ...result
-            };
-
-
-        } catch (error) {
-
-            console.error(
-                'GrekoLounge: Discord notification failed:',
-                error
-            );
-
-
-            /*
-             * The order has already been saved.
-             * Discord is only a notification.
-             */
-
-            return {
-                success: false,
-                error:
-                    error?.message ||
-                    'Discord notification failed.'
-            };
-
-        }
-
-    }
-
-
-    /* =========================================================
-       CHECKOUT SUBMISSION
-    ========================================================== */
-
-    if (checkoutConfirm) {
-
-        checkoutConfirm.addEventListener(
-            'click',
-            async () => {
-
-                if (checkoutConfirm.disabled) {
-                    return;
-                }
-
-
-                if (!validateCheckout()) {
-                    return;
-                }
-
-
-                if (cart.length === 0) {
-
-                    if (checkoutError) {
-
-                        checkoutError.textContent =
-                            'Your cart is empty.';
-
-                        checkoutError.classList.add(
-                            'show'
-                        );
-
-                    }
-
-                    return;
-
-                }
-
-
-                const total =
-                    getCartTotal();
-
-
-                if (total < MINIMUM_ORDER) {
-
-                    closeCheckout();
-
-                    openMinimumModal();
-
-                    return;
-
-                }
-
-
-                const username =
-                    checkoutUsername.value.trim();
-
-                const email =
-                    checkoutEmail.value.trim();
-
-
-                checkoutConfirm.disabled =
-                    true;
-
-                checkoutConfirm.textContent =
-                    'Submitting...';
-
-                clearCheckoutErrors();
-
-
-                const orderId =
-                    generateOrderId();
-
-
-                try {
-
-                    const orderPayload =
-                        createOrderPayload(
-                            orderId,
-                            username,
-                            email,
-                            total
-                        );
-
-
-                    console.log(
-                        'GrekoLounge: Order payload:',
-                        orderPayload
-                    );
-
-
-                    /* =========================================
-                       1. CREATE ORDER IN SUPABASE
-                    ========================================== */
-
-                    const createdOrder =
-                        await createOrderThroughRPC(
-                            orderPayload
-                        );
-
-
-                    console.log(
-                        'GrekoLounge: Order successfully created:',
-                        createdOrder
-                    );
-
-
-                    /* =========================================
-                       2. SEND DISCORD NOTIFICATION
-                    ========================================== */
-
-                    const discordResult =
-                        await sendOrderToDiscord(
-                            {
-                                ...orderPayload,
-
-                                id:
-                                    createdOrder.id,
-
-                                order_number:
-                                    createdOrder.order_number ||
-                                    orderPayload.order_number,
-
-                                status:
-                                    createdOrder.status ||
-                                    orderPayload.status
-                            }
-                        );
-
-
-                    if (
-                        discordResult &&
-                        discordResult.success === false
-                    ) {
-
-                        console.warn(
-                            'GrekoLounge: Order was created, but Discord notification failed.',
-                            discordResult
-                        );
-
-                    }
-
-
-                    /* =========================================
-                       3. SUCCESS
-                    ========================================== */
-
-                    closeCheckout();
-
-
-                    if (checkoutUsername) {
-                        checkoutUsername.value = '';
-                    }
-
-
-                    if (checkoutEmail) {
-                        checkoutEmail.value = '';
-                    }
-
-
-                    cart = [];
-
-
-                    updateCart();
-
-
-                    openStatusModal(
-                        createdOrder.order_number ||
-                        orderId,
-
-                        total
-                    );
-
-
-                    showToast(
-                        'Order submitted successfully.'
-                    );
-
-
-                } catch (error) {
-
-                    console.error(
-                        'GrekoLounge: Order submission failed:',
-                        error
-                    );
-
-
-                    let errorMessage =
-                        'We could not submit your order at this time. Please try again later.';
-
-
-                    if (
-                        error &&
-                        error.code === '23505'
-                    ) {
-
-                        errorMessage =
-                            'This order reference already exists. Please try again.';
-
-                    }
-
-
-                    if (
-                        error &&
-                        (
-                            error.code === '42501' ||
-                            error.code === 'PGRST301'
-                        )
-                    ) {
-
-                        errorMessage =
-                            'Database permissions are not configured correctly.';
-
-                    }
-
-
-                    if (
-                        error &&
-                        error.code === 'PGRST204'
-                    ) {
-
-                        errorMessage =
-                            'The database structure does not match the website code.';
-
-                    }
-
-
-                    if (
-                        error &&
-                        error.code === 'ORDER_NOT_FOUND'
-                    ) {
-
-                        errorMessage =
-                            'The order was created but could not be loaded afterwards.';
-
-                    }
-
-
-                    if (
-                        error &&
-                        error.code === 'ORDER_RPC_FAILED'
-                    ) {
-
-                        errorMessage =
-                            error.message ||
-                            'The secure order function rejected the order.';
-
-                    }
-
-
-                    if (checkoutError) {
-
-                        checkoutError.textContent =
-                            errorMessage;
-
-                        checkoutError.classList.add(
-                            'show'
-                        );
-
-                    }
-
-                } finally {
-
-                    checkoutConfirm.disabled =
-                        false;
-
-                    checkoutConfirm.textContent =
-                        'Submit Order';
-
-                }
-
-            }
-        );
-
-    }
-
-
-    /* =========================================================
-       ENTER KEY
-    ========================================================== */
-
-    [
-        checkoutUsername,
-        checkoutEmail
-    ].forEach(input => {
-
-        if (!input) {
-            return;
-        }
-
-
-        input.addEventListener(
-            'keydown',
-            event => {
-
-                if (event.key === 'Enter') {
-
-                    event.preventDefault();
-
-
-                    if (
-                        checkoutConfirm &&
-                        !checkoutConfirm.disabled
-                    ) {
-
-                        checkoutConfirm.click();
-
-                    }
-
-                }
-
-            }
-        );
-
-    });
-
-
-    /* =========================================================
-       LIVE FORM VALIDATION
-    ========================================================== */
-
-    if (checkoutUsername) {
-
-        checkoutUsername.addEventListener(
-            'input',
-            () => {
-
-                checkoutUsername.classList.remove(
-                    'input-error'
-                );
-
-                if (usernameError) {
-                    usernameError.textContent = '';
-                }
-
-            }
-        );
-
-    }
-
-
-    if (checkoutEmail) {
-
-        checkoutEmail.addEventListener(
-            'input',
-            () => {
-
-                checkoutEmail.classList.remove(
-                    'input-error'
-                );
-
-                if (emailError) {
-                    emailError.textContent = '';
-                }
-
-            }
-        );
-
-    }
-
-
-    /* =========================================================
-       PRODUCT CARD GLOW
-    ========================================================== */
-
-    const cards =
-        document.querySelectorAll(
-            '.shop-card'
-        );
-
-
-    cards.forEach(card => {
-
-        card.addEventListener(
-            'mousemove',
-            event => {
-
-                const glow =
-                    card.querySelector(
-                        '.card-glow'
-                    );
-
-
-                if (!glow) {
-                    return;
-                }
-
-
-                const rect =
-                    card.getBoundingClientRect();
-
-
-                const x =
-                    event.clientX -
-                    rect.left;
-
-                const y =
-                    event.clientY -
-                    rect.top;
-
-
-                let color =
-                    'rgba(212, 175, 55, 0.15)';
-
-
-                if (
-                    card.classList.contains(
-                        'card-google'
-                    )
-                ) {
-
-                    color =
-                        'rgba(61, 220, 132, 0.15)';
-
-                }
-
-
-                if (
-                    card.classList.contains(
-                        'card-apple'
-                    )
-                ) {
-
-                    color =
-                        'rgba(255, 255, 255, 0.15)';
-
-                }
-
-
-                if (
-                    card.classList.contains(
-                        'card-steam'
-                    )
-                ) {
-
-                    color =
-                        'rgba(102, 192, 244, 0.15)';
-
-                }
-
-
-                if (
-                    card.classList.contains(
-                        'card-paysafe'
-                    )
-                ) {
-
-                    color =
-                        'rgba(0, 166, 255, 0.15)';
-
-                }
-
-
-                glow.style.background =
-                    `radial-gradient(
-                        circle at ${x}px ${y}px,
-                        ${color} 0%,
-                        transparent 60%
-                    )`;
-
-            }
-        );
-
-
-        card.addEventListener(
-            'mouseleave',
-            () => {
-
-                const glow =
-                    card.querySelector(
-                        '.card-glow'
-                    );
-
-
-                if (!glow) {
-                    return;
-                }
-
-
-                glow.style.background =
-                    'radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%)';
-
-            }
-        );
-
-    });
-
-
-    /* =========================================================
-       SUPABASE CONNECTION TEST
-    ========================================================== */
-
-    async function testSupabaseConnection() {
-
-        try {
-
-            const {
-                error
-            } =
-                await supabaseClient
-                    .from('orders')
-                    .select('id')
-                    .limit(1);
-
-
-            if (error) {
-
-                console.warn(
-                    'GrekoLounge: Supabase connection/table test:',
-                    error.message
-                );
-
-                return;
-
-            }
-
-
-            console.log(
-                'GrekoLounge: Supabase connection successful.'
-            );
-
-        } catch (error) {
-
-            console.warn(
-                'GrekoLounge: Supabase connection test failed:',
-                error
-            );
-
-        }
-
-    }
-
-
-    /* =========================================================
-       INITIALIZE
-    ========================================================== */
-
-    updateCart();
-
-    testSupabaseConnection();
-
-});
+</body>
+</html>
