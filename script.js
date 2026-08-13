@@ -15,13 +15,10 @@ document.addEventListener('DOMContentLoaded', () => {
         !window.supabase ||
         typeof window.supabase.createClient !== 'function'
     ) {
-
         console.error(
             'GrekoLounge: Supabase library could not be loaded.'
         );
-
         return;
-
     }
 
 
@@ -38,13 +35,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const MINIMUM_ORDER = 100;
 
+    /*
+     * IMPORTANT:
+     * Discord webhook is NOT stored here.
+     *
+     * Discord is handled securely by the Supabase Edge Function.
+     */
 
-    /* =========================================================
-       DISCORD WEBHOOK
-    ========================================================== */
-
-    const DISCORD_WEBHOOK_URL =
-        'https://discord.com/api/webhooks/1537377526429523988/kTQaZ8voP2fZPlVaOR8SA-UMZqzjgZpyxzw9l_giKNeu8jozOalofk6m-zvPv7kFuzIc';
+    const DISCORD_FUNCTION_URL =
+        `${SUPABASE_URL}/functions/v1/dynamic-handler`;
 
 
     /* =========================================================
@@ -330,9 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        cartOverlay.classList.add(
-            'active'
-        );
+        cartOverlay.classList.add('active');
 
         lockBody();
 
@@ -345,9 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        cartOverlay.classList.remove(
-            'active'
-        );
+        cartOverlay.classList.remove('active');
 
         unlockBody();
 
@@ -362,9 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         updateCheckoutSummary();
 
-        checkoutOverlay.classList.add(
-            'active'
-        );
+        checkoutOverlay.classList.add('active');
 
         lockBody();
 
@@ -385,9 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        checkoutOverlay.classList.remove(
-            'active'
-        );
+        checkoutOverlay.classList.remove('active');
 
         clearCheckoutErrors();
 
@@ -411,12 +402,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 MINIMUM_ORDER - total
             );
 
+
         if (minimumCurrentTotal) {
 
             minimumCurrentTotal.textContent =
                 formatEuro(total);
 
         }
+
 
         if (minimumRemaining) {
 
@@ -425,9 +418,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         }
 
-        minimumOverlay.classList.add(
-            'active'
-        );
+
+        minimumOverlay.classList.add('active');
 
         lockBody();
 
@@ -440,23 +432,19 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        minimumOverlay.classList.remove(
-            'active'
-        );
+        minimumOverlay.classList.remove('active');
 
         unlockBody();
 
     }
 
 
-    function openStatusModal(
-        orderId,
-        total
-    ) {
+    function openStatusModal(orderId, total) {
 
         if (!statusOverlay) {
             return;
         }
+
 
         if (successOrderReference) {
 
@@ -465,6 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         }
 
+
         if (successOrderTotal) {
 
             successOrderTotal.textContent =
@@ -472,9 +461,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         }
 
-        statusOverlay.classList.add(
-            'active'
-        );
+
+        statusOverlay.classList.add('active');
 
         lockBody();
 
@@ -487,9 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        statusOverlay.classList.remove(
-            'active'
-        );
+        statusOverlay.classList.remove('active');
 
         unlockBody();
 
@@ -527,8 +513,7 @@ document.addEventListener('DOMContentLoaded', () => {
             event => {
 
                 if (
-                    event.target ===
-                    cartOverlay
+                    event.target === cartOverlay
                 ) {
 
                     closeCart();
@@ -568,8 +553,7 @@ document.addEventListener('DOMContentLoaded', () => {
             event => {
 
                 if (
-                    event.target ===
-                    checkoutOverlay
+                    event.target === checkoutOverlay
                 ) {
 
                     closeCheckout();
@@ -599,8 +583,7 @@ document.addEventListener('DOMContentLoaded', () => {
             event => {
 
                 if (
-                    event.target ===
-                    minimumOverlay
+                    event.target === minimumOverlay
                 ) {
 
                     closeMinimumModal();
@@ -630,8 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
             event => {
 
                 if (
-                    event.target ===
-                    statusOverlay
+                    event.target === statusOverlay
                 ) {
 
                     closeStatusModal();
@@ -648,12 +630,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'keydown',
         event => {
 
-            if (
-                event.key !== 'Escape'
-            ) {
-
+            if (event.key !== 'Escape') {
                 return;
-
             }
 
             closeCart();
@@ -832,9 +810,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
 
-        updateMinimumProgress(
-            total
-        );
+        updateMinimumProgress(total);
 
 
         if (checkoutBtn) {
@@ -855,15 +831,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             cartItemsContainer.innerHTML = `
                 <div class="empty-cart">
-
                     <div class="empty-cart-title">
                         Your cart is empty
                     </div>
-
                     <p>
                         Select a gift card to get started.
                     </p>
-
                 </div>
             `;
 
@@ -872,8 +845,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
 
-        cartItemsContainer.innerHTML =
-            '';
+        cartItemsContainer.innerHTML = '';
 
 
         cart.forEach(
@@ -890,9 +862,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                 const itemEl =
-                    document.createElement(
-                        'div'
-                    );
+                    document.createElement('div');
 
                 itemEl.className =
                     'cart-item';
@@ -903,21 +873,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="cart-item-info">
 
                         <h4>
-                            ${escapeHtml(
-                                item.title
-                            )}
+                            ${escapeHtml(item.title)}
                         </h4>
 
                         <p>
-                            ${formatEuro(
-                                itemTotal
-                            )} €
+                            ${formatEuro(itemTotal)} €
                         </p>
 
                         <div class="cart-item-meta">
-                            ${formatEuro(
-                                price
-                            )} € per item
+                            ${formatEuro(price)} € per item
                         </div>
 
                         <div class="cart-item-controls">
@@ -955,7 +919,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     >
                         Remove
                     </button>
-
                 `;
 
 
@@ -980,9 +943,7 @@ document.addEventListener('DOMContentLoaded', () => {
             event => {
 
                 const button =
-                    event.target.closest(
-                        'button'
-                    );
+                    event.target.closest('button');
 
                 if (!button) {
                     return;
@@ -1013,10 +974,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     );
 
 
-                if (
-                    action ===
-                    'increase'
-                ) {
+                if (action === 'increase') {
 
                     cart[index].quantity += 1;
 
@@ -1029,10 +987,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
 
-                if (
-                    action ===
-                    'decrease'
-                ) {
+                if (action === 'decrease') {
 
                     cart[index].quantity -= 1;
 
@@ -1041,10 +996,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         cart[index].quantity <= 0
                     ) {
 
-                        cart.splice(
-                            index,
-                            1
-                        );
+                        cart.splice(index, 1);
 
                     }
 
@@ -1058,20 +1010,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
 
-                if (
-                    action ===
-                    'remove'
-                ) {
+                if (action === 'remove') {
 
                     const removedItem =
                         cart[index];
 
 
-                    cart.splice(
-                        index,
-                        1
-                    );
-
+                    cart.splice(index, 1);
 
                     updateCart();
 
@@ -1118,30 +1063,20 @@ document.addEventListener('DOMContentLoaded', () => {
             `${percentage}%`;
 
 
-        if (
-            total >= MINIMUM_ORDER
-        ) {
+        if (total >= MINIMUM_ORDER) {
 
-            minimumProgress.classList.add(
-                'complete'
-            );
+            minimumProgress.classList.add('complete');
 
-            minimumOrderBox.classList.add(
-                'complete'
-            );
+            minimumOrderBox.classList.add('complete');
 
             minimumOrderMessage.textContent =
                 'Minimum order reached. You can proceed to checkout.';
 
         } else {
 
-            minimumProgress.classList.remove(
-                'complete'
-            );
+            minimumProgress.classList.remove('complete');
 
-            minimumOrderBox.classList.remove(
-                'complete'
-            );
+            minimumOrderBox.classList.remove('complete');
 
 
             const remaining =
@@ -1149,9 +1084,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
             minimumOrderMessage.textContent =
-                `Add ${formatEuro(
-                    remaining
-                )} € more to reach the minimum order.`;
+                `Add ${formatEuro(remaining)} € more to reach the minimum order.`;
 
         }
 
@@ -1168,15 +1101,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        cartBadge.classList.remove(
-            'bump'
-        );
+        cartBadge.classList.remove('bump');
 
         void cartBadge.offsetWidth;
 
-        cartBadge.classList.add(
-            'bump'
-        );
+        cartBadge.classList.add('bump');
 
     }
 
@@ -1195,9 +1124,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     getCartTotal();
 
 
-                if (
-                    cart.length === 0
-                ) {
+                if (cart.length === 0) {
 
                     showToast(
                         'Your cart is empty.'
@@ -1208,9 +1135,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
 
-                if (
-                    total < MINIMUM_ORDER
-                ) {
+                if (total < MINIMUM_ORDER) {
 
                     openMinimumModal();
 
@@ -1246,8 +1171,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
 
-        checkoutSummaryItems.innerHTML =
-            '';
+        checkoutSummaryItems.innerHTML = '';
 
 
         const itemCount =
@@ -1282,9 +1206,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
             const row =
-                document.createElement(
-                    'div'
-                );
+                document.createElement('div');
 
             row.className =
                 'checkout-summary-item';
@@ -1293,9 +1215,7 @@ document.addEventListener('DOMContentLoaded', () => {
             row.innerHTML = `
 
                 <span>
-                    ${escapeHtml(
-                        item.title
-                    )}
+                    ${escapeHtml(item.title)}
                     ${
                         quantity > 1
                             ? ` × ${quantity}`
@@ -1304,17 +1224,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 </span>
 
                 <span>
-                    ${formatEuro(
-                        itemTotal
-                    )} €
+                    ${formatEuro(itemTotal)} €
                 </span>
 
             `;
 
 
-            checkoutSummaryItems.appendChild(
-                row
-            );
+            checkoutSummaryItems.appendChild(row);
 
         });
 
@@ -1337,12 +1253,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (checkoutError) {
 
-            checkoutError.textContent =
-                '';
+            checkoutError.textContent = '';
 
-            checkoutError.classList.remove(
-                'show'
-            );
+            checkoutError.classList.remove('show');
 
         }
 
@@ -1369,55 +1282,66 @@ document.addEventListener('DOMContentLoaded', () => {
 
         clearCheckoutErrors();
 
+
         const username =
-            checkoutUsername.value.trim();
+            checkoutUsername
+                ? checkoutUsername.value.trim()
+                : '';
+
 
         const email =
-            checkoutEmail.value.trim();
+            checkoutEmail
+                ? checkoutEmail.value.trim()
+                : '';
 
-        let valid =
-            true;
+
+        let valid = true;
 
 
         if (!username) {
 
-            usernameError.textContent =
-                'Please enter your username.';
+            if (usernameError) {
+                usernameError.textContent =
+                    'Please enter your username.';
+            }
 
-            checkoutUsername.classList.add(
-                'input-error'
-            );
+            if (checkoutUsername) {
+                checkoutUsername.classList.add(
+                    'input-error'
+                );
+            }
 
-            valid =
-                false;
+            valid = false;
 
-        } else if (
-            username.length < 2
-        ) {
+        } else if (username.length < 2) {
 
-            usernameError.textContent =
-                'Username must contain at least 2 characters.';
+            if (usernameError) {
+                usernameError.textContent =
+                    'Username must contain at least 2 characters.';
+            }
 
-            checkoutUsername.classList.add(
-                'input-error'
-            );
+            if (checkoutUsername) {
+                checkoutUsername.classList.add(
+                    'input-error'
+                );
+            }
 
-            valid =
-                false;
+            valid = false;
 
-        } else if (
-            username.length > 100
-        ) {
+        } else if (username.length > 100) {
 
-            usernameError.textContent =
-                'Username is too long.';
+            if (usernameError) {
+                usernameError.textContent =
+                    'Username is too long.';
+            }
 
-            checkoutUsername.classList.add(
-                'input-error'
-            );
+            if (checkoutUsername) {
+                checkoutUsername.classList.add(
+                    'input-error'
+                );
+            }
 
-            valid =
-                false;
+            valid = false;
 
         }
 
@@ -1428,43 +1352,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!email) {
 
-            emailError.textContent =
-                'Please enter your email address.';
+            if (emailError) {
+                emailError.textContent =
+                    'Please enter your email address.';
+            }
 
-            checkoutEmail.classList.add(
-                'input-error'
-            );
+            if (checkoutEmail) {
+                checkoutEmail.classList.add(
+                    'input-error'
+                );
+            }
 
-            valid =
-                false;
+            valid = false;
 
-        } else if (
-            !emailPattern.test(email)
-        ) {
+        } else if (!emailPattern.test(email)) {
 
-            emailError.textContent =
-                'Please enter a valid email address.';
+            if (emailError) {
+                emailError.textContent =
+                    'Please enter a valid email address.';
+            }
 
-            checkoutEmail.classList.add(
-                'input-error'
-            );
+            if (checkoutEmail) {
+                checkoutEmail.classList.add(
+                    'input-error'
+                );
+            }
 
-            valid =
-                false;
+            valid = false;
 
-        } else if (
-            email.length > 254
-        ) {
+        } else if (email.length > 254) {
 
-            emailError.textContent =
-                'Email address is too long.';
+            if (emailError) {
+                emailError.textContent =
+                    'Email address is too long.';
+            }
 
-            checkoutEmail.classList.add(
-                'input-error'
-            );
+            if (checkoutEmail) {
+                checkoutEmail.classList.add(
+                    'input-error'
+                );
+            }
 
-            valid =
-                false;
+            valid = false;
 
         }
 
@@ -1537,449 +1466,195 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     /* =========================================================
-       SAVE ORDER TO SUPABASE
-       IMPORTANT:
-       orders and order_items are separate tables.
+       CREATE ORDER THROUGH SECURE RPC
     ========================================================== */
 
-    async function saveOrderToSupabase(
+    async function createOrderThroughRPC(
         orderPayload
     ) {
 
         console.log(
-            'GrekoLounge: Saving order to Supabase...'
+            'GrekoLounge: Creating order through secure RPC...'
         );
 
-
-        /*
-         * Get current authenticated user if one exists.
-         * For normal website visitors this will usually be null.
-         */
-
-        let customerId = null;
-
-        try {
-
-            const {
-                data: authData
-            } =
-                await supabaseClient.auth.getUser();
-
-            if (
-                authData &&
-                authData.user &&
-                authData.user.id
-            ) {
-
-                customerId =
-                    authData.user.id;
-
-            }
-
-        } catch (authError) {
-
-            console.warn(
-                'GrekoLounge: Could not get authenticated user. Continuing as guest.',
-                authError
-            );
-
-        }
-
-
-        /* =====================================================
-           1. INSERT INTO orders
-        ====================================================== */
-
-        const orderRow = {
-
-            order_number:
-                orderPayload.order_number,
-
-            customer_id:
-                customerId,
-
-            customer_name:
-                orderPayload.customer_name,
-
-            customer_email:
-                orderPayload.customer_email,
-
-            total:
-                orderPayload.total,
-
-            status:
-                orderPayload.status
-
-        };
-
-
-        console.log(
-            'GrekoLounge: Order row:',
-            orderRow
-        );
-
-
-        /*
-         * IMPORTANT:
-         * No .select() here.
-         *
-         * This avoids requiring SELECT permission on the newly
-         * created order when using RLS.
-         */
 
         const {
-            error: orderError
+            data,
+            error
         } =
-            await supabaseClient
-                .from('orders')
-                .insert(
-                    orderRow
-                );
+            await supabaseClient.rpc(
+                'create_order_secure',
+                {
+                    p_order_number:
+                        orderPayload.order_number,
 
+                    p_customer_name:
+                        orderPayload.customer_name,
 
-        if (orderError) {
+                    p_customer_email:
+                        orderPayload.customer_email,
 
-            console.error(
-                'GrekoLounge: Supabase orders insert error:',
-                orderError
+                    p_total:
+                        orderPayload.total,
+
+                    p_items:
+                        orderPayload.items
+                }
             );
 
-            throw orderError;
 
-        }
-
-
-        console.log(
-            'GrekoLounge: Order inserted successfully.'
-        );
-
-
-        /* =====================================================
-           2. FIND THE CREATED ORDER
-           
-           Because the order ID is generated by PostgreSQL,
-           we need it for order_items.
-        ====================================================== */
-
-        const {
-            data: createdOrder,
-            error: findOrderError
-        } =
-            await supabaseClient
-                .from('orders')
-                .select('id, order_number')
-                .eq(
-                    'order_number',
-                    orderPayload.order_number
-                )
-                .maybeSingle();
-
-
-        if (findOrderError) {
+        if (error) {
 
             console.error(
-                'GrekoLounge: Could not retrieve created order:',
-                findOrderError
+                'GrekoLounge: Secure RPC error:',
+                error
             );
-
-            throw findOrderError;
-
-        }
-
-
-        if (!createdOrder) {
-
-            const error =
-                new Error(
-                    'Order was created but could not be retrieved.'
-                );
-
-            error.code =
-                'ORDER_NOT_FOUND';
 
             throw error;
 
         }
 
 
-        /* =====================================================
-           3. CREATE ORDER ITEMS
-        ====================================================== */
-
-        const orderItems =
-            orderPayload.items.map(item => ({
-
-                order_id:
-                    createdOrder.id,
-
-                product_id:
-                    null,
-
-                product_name:
-                    item.product_name,
-
-                product_value:
-                    item.product_value,
-
-                unit_price:
-                    item.unit_price,
-
-                quantity:
-                    item.quantity,
-
-                subtotal:
-                    item.subtotal
-
-            }));
+        console.log(
+            'GrekoLounge: RPC response:',
+            data
+        );
 
 
         if (
-            orderItems.length > 0
+            !data ||
+            data.success !== true
         ) {
 
-            console.log(
-                'GrekoLounge: Saving order items...',
-                orderItems
-            );
-
-
-            const {
-                error: itemsError
-            } =
-                await supabaseClient
-                    .from('order_items')
-                    .insert(
-                        orderItems
-                    );
-
-
-            if (itemsError) {
-
-                console.error(
-                    'GrekoLounge: Supabase order_items insert error:',
-                    itemsError
+            const rpcError =
+                new Error(
+                    data?.error ||
+                    'The order could not be created.'
                 );
 
-                throw itemsError;
+            rpcError.code =
+                data?.code ||
+                'ORDER_RPC_FAILED';
 
-            }
+            throw rpcError;
 
         }
 
 
-        console.log(
-            'GrekoLounge: Order items saved successfully.'
-        );
-
-
-        return {
-
-            id:
-                createdOrder.id,
-
-            order_number:
-                createdOrder.order_number
-
-        };
+        return data;
 
     }
 
 
     /* =========================================================
-       SEND ORDER TO DISCORD
+       SEND ORDER TO SUPABASE EDGE FUNCTION
+       
+       IMPORTANT:
+       The Discord webhook URL is NOT here.
+       The webhook is stored as a Supabase secret.
     ========================================================== */
 
     async function sendOrderToDiscord(
         orderPayload
     ) {
 
-        if (
-            !DISCORD_WEBHOOK_URL ||
-            DISCORD_WEBHOOK_URL ===
-            'DEIN_DISCORD_WEBHOOK_HIER'
-        ) {
-
-            console.warn(
-                'GrekoLounge: Discord webhook is not configured.'
-            );
-
-            return;
-
-        }
-
-
-        const itemsText =
-            orderPayload.items
-                .map(item => {
-
-                    return (
-                        `• ${item.product_name}` +
-                        ` × ${item.quantity}` +
-                        ` — ${formatEuro(
-                            item.subtotal
-                        )} €`
-                    );
-
-                })
-                .join('\n');
-
-
-        const discordPayload = {
-
-            username:
-                'GrekoLounge Orders',
-
-            embeds: [
-
-                {
-
-                    title:
-                        '🛒 Neue GrekoLounge Bestellung',
-
-                    color:
-                        0xD4AF37,
-
-                    fields: [
-
-                        {
-
-                            name:
-                                '🆔 Order ID',
-
-                            value:
-                                String(
-                                    orderPayload.order_number
-                                ),
-
-                            inline:
-                                true
-
-                        },
-
-                        {
-
-                            name:
-                                '👤 Username',
-
-                            value:
-                                String(
-                                    orderPayload.customer_name
-                                ),
-
-                            inline:
-                                true
-
-                        },
-
-                        {
-
-                            name:
-                                '📧 E-Mail',
-
-                            value:
-                                String(
-                                    orderPayload.customer_email
-                                ),
-
-                            inline:
-                                false
-
-                        },
-
-                        {
-
-                            name:
-                                '💰 Gesamtbetrag',
-
-                            value:
-                                `${formatEuro(
-                                    orderPayload.total
-                                )} €`,
-
-                            inline:
-                                true
-
-                        },
-
-                        {
-
-                            name:
-                                '📌 Status',
-
-                            value:
-                                String(
-                                    orderPayload.status
-                                ),
-
-                            inline:
-                                true
-
-                        },
-
-                        {
-
-                            name:
-                                '📦 Produkte',
-
-                            value:
-                                itemsText ||
-                                'Keine Produkte',
-
-                            inline:
-                                false
-
-                        }
-
-                    ],
-
-                    footer: {
-
-                        text:
-                            'GrekoLounge Orders'
-
-                    },
-
-                    timestamp:
-                        new Date().toISOString()
-
-                }
-
-            ]
-
-        };
+        console.log(
+            'GrekoLounge: Sending Discord notification through Edge Function...'
+        );
 
 
         try {
 
+            const {
+                data: authData
+            } =
+                await supabaseClient.auth.getSession();
+
+
+            const accessToken =
+                authData?.session?.access_token ||
+                SUPABASE_PUBLISHABLE_KEY;
+
+
             const response =
                 await fetch(
-                    DISCORD_WEBHOOK_URL,
+                    DISCORD_FUNCTION_URL,
                     {
-
-                        method:
-                            'POST',
+                        method: 'POST',
 
                         headers: {
+                            'Authorization':
+                                `Bearer ${accessToken}`,
+
+                            'apikey':
+                                SUPABASE_PUBLISHABLE_KEY,
 
                             'Content-Type':
                                 'application/json'
-
                         },
 
                         body:
                             JSON.stringify(
-                                discordPayload
+                                orderPayload
                             )
-
                     }
                 );
 
 
+            let result = null;
+
+
+            try {
+
+                result =
+                    await response.json();
+
+            } catch {
+
+                result = null;
+
+            }
+
+
+            console.log(
+                'GrekoLounge: Discord Edge Function response:',
+                result
+            );
+
+
             if (!response.ok) {
 
-                throw new Error(
-                    `Discord webhook failed: ${response.status}`
-                );
+                const error =
+                    new Error(
+                        result?.error ||
+                        `Discord function returned HTTP ${response.status}`
+                    );
+
+                error.code =
+                    result?.code ||
+                    `HTTP_${response.status}`;
+
+                throw error;
+
+            }
+
+
+            if (
+                result &&
+                result.success === false
+            ) {
+
+                const error =
+                    new Error(
+                        result.error ||
+                        'Discord notification failed.'
+                    );
+
+                error.code =
+                    result.code ||
+                    'DISCORD_NOTIFICATION_FAILED';
+
+                throw error;
 
             }
 
@@ -1989,12 +1664,28 @@ document.addEventListener('DOMContentLoaded', () => {
             );
 
 
+            return result;
+
         } catch (error) {
 
             console.error(
                 'GrekoLounge: Discord notification failed:',
                 error
             );
+
+            /*
+             * Do NOT reject the order here.
+             *
+             * The order has already been safely created
+             * in Supabase. Discord is only a notification.
+             */
+
+            return {
+                success: false,
+                error:
+                    error?.message ||
+                    'Discord notification failed.'
+            };
 
         }
 
@@ -2011,34 +1702,28 @@ document.addEventListener('DOMContentLoaded', () => {
             'click',
             async () => {
 
-                if (
-                    checkoutConfirm.disabled
-                ) {
-
+                if (checkoutConfirm.disabled) {
                     return;
-
                 }
 
 
-                if (
-                    !validateCheckout()
-                ) {
-
+                if (!validateCheckout()) {
                     return;
-
                 }
 
 
-                if (
-                    cart.length === 0
-                ) {
+                if (cart.length === 0) {
 
-                    checkoutError.textContent =
-                        'Your cart is empty.';
+                    if (checkoutError) {
 
-                    checkoutError.classList.add(
-                        'show'
-                    );
+                        checkoutError.textContent =
+                            'Your cart is empty.';
+
+                        checkoutError.classList.add(
+                            'show'
+                        );
+
+                    }
 
                     return;
 
@@ -2049,9 +1734,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     getCartTotal();
 
 
-                if (
-                    total < MINIMUM_ORDER
-                ) {
+                if (total < MINIMUM_ORDER) {
 
                     closeCheckout();
 
@@ -2093,22 +1776,58 @@ document.addEventListener('DOMContentLoaded', () => {
                         );
 
 
-                    /* =========================================
-                       1. SAVE TO SUPABASE
-                    ========================================== */
-
-                    await saveOrderToSupabase(
+                    console.log(
+                        'GrekoLounge: Order payload:',
                         orderPayload
                     );
 
 
                     /* =========================================
-                       2. SEND DISCORD
+                       1. CREATE ORDER IN SUPABASE
                     ========================================== */
 
-                    await sendOrderToDiscord(
-                        orderPayload
+                    const createdOrder =
+                        await createOrderThroughRPC(
+                            orderPayload
+                        );
+
+
+                    console.log(
+                        'GrekoLounge: Order successfully created:',
+                        createdOrder
                     );
+
+
+                    /* =========================================
+                       2. SEND DISCORD NOTIFICATION
+                    ========================================== */
+
+                    const discordResult =
+                        await sendOrderToDiscord(
+                            {
+                                ...orderPayload,
+
+                                id:
+                                    createdOrder.id,
+
+                                order_number:
+                                    createdOrder.order_number ||
+                                    orderPayload.order_number
+                            }
+                        );
+
+
+                    if (
+                        discordResult &&
+                        discordResult.success === false
+                    ) {
+
+                        console.warn(
+                            'GrekoLounge: Order was created, but Discord notification failed.',
+                            discordResult
+                        );
+
+                    }
 
 
                     /* =========================================
@@ -2118,22 +1837,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     closeCheckout();
 
 
-                    checkoutUsername.value =
-                        '';
+                    if (checkoutUsername) {
+                        checkoutUsername.value = '';
+                    }
 
-                    checkoutEmail.value =
-                        '';
+                    if (checkoutEmail) {
+                        checkoutEmail.value = '';
+                    }
 
 
-                    cart =
-                        [];
+                    cart = [];
 
 
                     updateCart();
 
 
                     openStatusModal(
+                        createdOrder.order_number ||
                         orderId,
+
                         total
                     );
 
@@ -2186,7 +1908,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ) {
 
                         errorMessage =
-                            'The database structure does not match the website code. Please refresh the Supabase schema.';
+                            'The database structure does not match the website code.';
 
                     }
 
@@ -2203,8 +1925,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                     if (
-                        checkoutError
+                        error &&
+                        error.code === 'ORDER_RPC_FAILED'
                     ) {
+
+                        errorMessage =
+                            error.message ||
+                            'The secure order function rejected the order.';
+
+                    }
+
+
+                    if (checkoutError) {
 
                         checkoutError.textContent =
                             errorMessage;
@@ -2249,11 +1981,10 @@ document.addEventListener('DOMContentLoaded', () => {
             'keydown',
             event => {
 
-                if (
-                    event.key === 'Enter'
-                ) {
+                if (event.key === 'Enter') {
 
                     event.preventDefault();
+
 
                     if (
                         checkoutConfirm &&
@@ -2286,8 +2017,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     'input-error'
                 );
 
-                usernameError.textContent =
-                    '';
+                if (usernameError) {
+                    usernameError.textContent = '';
+                }
 
             }
         );
@@ -2305,8 +2037,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     'input-error'
                 );
 
-                emailError.textContent =
-                    '';
+                if (emailError) {
+                    emailError.textContent = '';
+                }
 
             }
         );
