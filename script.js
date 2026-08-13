@@ -1,153 +1,82 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // =========================================================
-    // CONFIGURATION
-    // =========================================================
-
-    // !!! PUT YOUR REAL DISCORD WEBHOOK URL HERE !!!
-    const WEBHOOK_URL =
-        'https://discord.com/api/webhooks/1537191628685447179/iZudIoXS5ACxFPIZDsBoX69O5L5tp7d5-ZnSBYRdXNXFl6gLXgXfjkcrQBuZy1xDwpZM';
-
-    // Admin page
-    const ADMIN_BASE =
-        'https://error-404y.github.io/GrekoLounge/admin.html';
-
-
-    // =========================================================
-    // CART
-    // =========================================================
-
     let cart = [];
 
-
-    const cartBtn =
-        document.getElementById('cartBtn');
-
-    const cartOverlay =
-        document.getElementById('cartOverlay');
-
-    const closeCartBtn =
-        document.getElementById('closeCart');
-
-    const cartItemsContainer =
-        document.getElementById('cartItems');
-
-    const cartTotalEl =
-        document.getElementById('cartTotal');
+    const MINIMUM_ORDER = 100;
 
 
-    const addToCartBtns =
-        document.querySelectorAll('.add-to-cart');
+    // ─────────────────────────────────────────────────────────────────────────
+    // Cart Elements
+    // ─────────────────────────────────────────────────────────────────────────
+
+    const cartBtn = document.getElementById('cartBtn');
+    const cartOverlay = document.getElementById('cartOverlay');
+    const closeCartBtn = document.getElementById('closeCart');
+    const cartItemsContainer = document.getElementById('cartItems');
+    const cartTotalEl = document.getElementById('cartTotal');
+    const addToCartBtns = document.querySelectorAll('.add-to-cart');
 
 
-    // =========================================================
-    // SUCCESS TOAST
-    // =========================================================
+    // ─────────────────────────────────────────────────────────────────────────
+    // Minimum Order Elements
+    // ─────────────────────────────────────────────────────────────────────────
 
-    const toastMessage =
-        document.getElementById('toastMessage');
+    const minimumOrderModal =
+        document.getElementById('minimumOrderModal');
 
-
-    /*
-        IMPORTANT:
-
-        The success popup is completely hidden when
-        the website loads.
-
-        It is ONLY shown by showToast(), which is
-        called after a successful Discord request.
-    */
-
-    if (toastMessage) {
-
-        toastMessage.classList.remove('show');
-
-        toastMessage.style.display = 'none';
-
-    }
+    const minimumOrderContinue =
+        document.getElementById('minimumOrderContinue');
 
 
-    // =========================================================
-    // CART OPEN
-    // =========================================================
+    // ─────────────────────────────────────────────────────────────────────────
+    // Cart Modal
+    // ─────────────────────────────────────────────────────────────────────────
 
-    if (cartBtn) {
-
-        cartBtn.addEventListener('click', () => {
-
-            if (cartOverlay) {
-                cartOverlay.classList.add('active');
-            }
-
-        });
-
-    }
+    cartBtn.addEventListener('click', () => {
+        cartOverlay.classList.add('active');
+    });
 
 
-    // =========================================================
-    // CART CLOSE
-    // =========================================================
-
-    if (closeCartBtn) {
-
-        closeCartBtn.addEventListener('click', () => {
-
-            if (cartOverlay) {
-                cartOverlay.classList.remove('active');
-            }
-
-        });
-
-    }
+    closeCartBtn.addEventListener('click', () => {
+        cartOverlay.classList.remove('active');
+    });
 
 
-    if (cartOverlay) {
-
-        cartOverlay.addEventListener('click', (event) => {
-
-            if (event.target === cartOverlay) {
-
-                cartOverlay.classList.remove('active');
-
-            }
-
-        });
-
-    }
+    cartOverlay.addEventListener('click', (e) => {
+        if (e.target === cartOverlay) {
+            cartOverlay.classList.remove('active');
+        }
+    });
 
 
-    // =========================================================
-    // ADD TO CART
-    // =========================================================
+    // ─────────────────────────────────────────────────────────────────────────
+    // Add To Cart
+    // ─────────────────────────────────────────────────────────────────────────
 
-    addToCartBtns.forEach(button => {
+    addToCartBtns.forEach(btn => {
 
-        button.addEventListener('click', () => {
+        btn.addEventListener('click', () => {
 
             const title =
-                button.getAttribute('data-title');
+                btn.getAttribute('data-title');
 
             const price =
-                Number(
-                    button.getAttribute('data-price')
+                parseInt(
+                    btn.getAttribute('data-price'),
+                    10
                 );
 
             const value =
-                button.getAttribute('data-value') || '';
+                btn.getAttribute('data-value');
 
 
-            if (!title || !Number.isFinite(price)) {
-
+            // Prevent invalid prices from entering the cart
+            if (Number.isNaN(price)) {
                 console.error(
-                    'Invalid product:',
-                    {
-                        title,
-                        price
-                    }
+                    `Invalid price for product: ${title}`
                 );
 
                 return;
-
             }
 
 
@@ -162,38 +91,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
             // Button feedback
-
             const originalText =
-                button.textContent;
+                btn.textContent;
 
 
-            button.textContent =
-                'Added!';
+            btn.textContent = 'Added!';
 
-
-            button.style.background =
-                '#4CAF50';
-
-            button.style.color =
-                '#ffffff';
-
-            button.style.borderColor =
-                '#4CAF50';
+            btn.style.background = '#4CAF50';
+            btn.style.color = 'white';
+            btn.style.borderColor = '#4CAF50';
 
 
             setTimeout(() => {
 
-                button.textContent =
+                btn.textContent =
                     originalText;
 
-                button.style.background =
-                    '';
-
-                button.style.color =
-                    '';
-
-                button.style.borderColor =
-                    '';
+                btn.style.background = '';
+                btn.style.color = '';
+                btn.style.borderColor = '';
 
             }, 1500);
 
@@ -202,23 +118,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // =========================================================
-    // UPDATE CART
-    // =========================================================
+    // ─────────────────────────────────────────────────────────────────────────
+    // Update Cart
+    // ─────────────────────────────────────────────────────────────────────────
 
     function updateCart() {
 
-        if (cartBtn) {
-
-            cartBtn.textContent =
-                `Cart (${cart.length})`;
-
-        }
-
-
-        if (!cartItemsContainer) {
-            return;
-        }
+        cartBtn.textContent =
+            `Cart (${cart.length})`;
 
 
         if (cart.length === 0) {
@@ -226,13 +133,9 @@ document.addEventListener('DOMContentLoaded', () => {
             cartItemsContainer.innerHTML =
                 '<p class="empty-cart">Your cart is empty.</p>';
 
-
-            if (cartTotalEl) {
-                cartTotalEl.textContent = '0';
-            }
+            cartTotalEl.textContent = '0';
 
             return;
-
         }
 
 
@@ -247,81 +150,66 @@ document.addEventListener('DOMContentLoaded', () => {
             total += item.price;
 
 
-            const itemElement =
+            const itemEl =
                 document.createElement('div');
 
 
-            itemElement.className =
-                'cart-item';
+            itemEl.classList.add(
+                'cart-item'
+            );
 
 
-            itemElement.innerHTML = `
-
+            itemEl.innerHTML = `
                 <div class="cart-item-info">
-
-                    <h4>
-                        ${escapeHtml(item.title)}
-                    </h4>
-
-                    <p>
-                        ${item.price} &euro;
-                    </p>
-
+                    <h4>${escapeHtml(item.title)}</h4>
+                    <p>${item.price} &euro;</p>
                 </div>
 
                 <button
-                    type="button"
                     class="remove-item"
                     data-index="${index}"
                 >
                     Remove
                 </button>
-
             `;
 
 
             cartItemsContainer.appendChild(
-                itemElement
+                itemEl
             );
 
         });
 
 
-        if (cartTotalEl) {
-
-            cartTotalEl.textContent =
-                total.toString();
-
-        }
+        cartTotalEl.textContent =
+            total;
 
 
+        // Remove buttons
         document
             .querySelectorAll('.remove-item')
-            .forEach(button => {
+            .forEach(btn => {
 
-                button.addEventListener(
+                btn.addEventListener(
                     'click',
-                    () => {
+                    (e) => {
 
                         const index =
-                            Number(
-                                button.getAttribute(
+                            parseInt(
+                                e.target.getAttribute(
                                     'data-index'
-                                )
+                                ),
+                                10
                             );
 
 
-                        if (
-                            Number.isInteger(index) &&
-                            index >= 0 &&
-                            index < cart.length
-                        ) {
+                        cart.splice(
+                            index,
+                            1
+                        );
 
-                            cart.splice(index, 1);
 
-                            updateCart();
-
-                        }
+                        updateCart();
 
                     }
                 );
@@ -331,9 +219,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // =========================================================
-    // CHECKOUT ELEMENTS
-    // =========================================================
+    // ─────────────────────────────────────────────────────────────────────────
+    // Checkout Elements
+    // ─────────────────────────────────────────────────────────────────────────
 
     const checkoutBtn =
         document.querySelector('.checkout-btn');
@@ -353,622 +241,653 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkoutEmail =
         document.getElementById('checkoutEmail');
 
-
-    // =========================================================
-    // OPEN CHECKOUT
-    // =========================================================
-
-    if (checkoutBtn) {
-
-        checkoutBtn.addEventListener('click', () => {
-
-            if (cart.length === 0) {
-
-                alert(
-                    'Your cart is empty. Please add an item first.'
-                );
-
-                return;
-
-            }
+    const toastMessage =
+        document.getElementById('toastMessage');
 
 
-            if (cartOverlay) {
-                cartOverlay.classList.remove('active');
-            }
+    // ─────────────────────────────────────────────────────────────────────────
+    // Checkout
+    // ─────────────────────────────────────────────────────────────────────────
 
+    checkoutBtn.addEventListener('click', () => {
 
-            if (checkoutOverlay) {
-                checkoutOverlay.classList.add('active');
-            }
-
-        });
-
-    }
-
-
-    // =========================================================
-    // CANCEL CHECKOUT
-    // =========================================================
-
-    if (checkoutCancel) {
-
-        checkoutCancel.addEventListener('click', () => {
-
-            if (checkoutOverlay) {
-                checkoutOverlay.classList.remove('active');
-            }
-
-
-            if (checkoutUsername) {
-                checkoutUsername.value = '';
-            }
-
-
-            if (checkoutEmail) {
-                checkoutEmail.value = '';
-            }
-
-        });
-
-    }
-
-
-    // =========================================================
-    // CHECKOUT SUBMISSION
-    // =========================================================
-
-    if (checkoutConfirm) {
-
-        checkoutConfirm.addEventListener(
-            'click',
-            submitOrder
-        );
-
-    }
-
-
-    async function submitOrder() {
-
-        // Prevent double submission
-
-        if (checkoutConfirm.disabled) {
-            return;
-        }
-
-
-        const username =
-            checkoutUsername
-                ? checkoutUsername.value.trim()
-                : '';
-
-
-        const email =
-            checkoutEmail
-                ? checkoutEmail.value.trim()
-                : '';
-
-
-        // =====================================================
-        // VALIDATION
-        // =====================================================
-
-        if (!username) {
-
-            alert(
-                'Please enter your username.'
-            );
-
-            return;
-
-        }
-
-
-        if (!email) {
-
-            alert(
-                'Please enter your email address.'
-            );
-
-            return;
-
-        }
-
-
-        if (!isValidEmail(email)) {
-
-            alert(
-                'Please enter a valid email address.'
-            );
-
-            return;
-
-        }
-
-
+        // First check whether the cart is empty
         if (cart.length === 0) {
 
             alert(
-                'Your cart is empty.'
+                'Your cart is empty! Please add some cards before checking out.'
             );
 
             return;
-
         }
 
 
-        if (
-            !WEBHOOK_URL ||
-            WEBHOOK_URL ===
-            'PASTE_YOUR_DISCORD_WEBHOOK_URL_HERE'
-        ) {
-
-            alert(
-                'The Discord webhook has not been configured yet.'
-            );
-
-            console.error(
-                'WEBHOOK_URL is not configured.'
-            );
-
-            return;
-
-        }
-
-
-        // =====================================================
-        // LOCK BUTTON
-        // =====================================================
-
-        checkoutConfirm.disabled = true;
-
-        checkoutConfirm.textContent =
-            'Submitting...';
-
-
-        // =====================================================
-        // ORDER INFORMATION
-        // =====================================================
-
-        const now =
-            new Date();
-
-
-        const timestamp =
-            now.toISOString();
-
-
-        const readableTime =
-            now.toLocaleString(
-                'en-GB',
-                {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit'
-                }
-            );
-
-
-        const randomPart =
-            Math.random()
-                .toString(36)
-                .substring(2, 7)
-                .toUpperCase();
-
-
-        const orderId =
-            `GL-${now.getFullYear()}-` +
-            `${String(
-                now.getMonth() + 1
-            ).padStart(2, '0')}` +
-            `${String(
-                now.getDate()
-            ).padStart(2, '0')}-` +
-            randomPart;
-
-
-        const total =
+        // Calculate current cart total
+        const cartTotal =
             cart.reduce(
-                (sum, item) =>
-                    sum + item.price,
+                (sum, item) => sum + item.price,
                 0
             );
 
 
-        // =====================================================
-        // ITEMS
-        // =====================================================
+        // ─────────────────────────────────────────────────────────────────────
+        // Minimum Order Check
+        // ─────────────────────────────────────────────────────────────────────
 
-        const itemLines =
-            cart.map(
-                (item, index) => {
+        if (cartTotal < MINIMUM_ORDER) {
 
-                    return (
-                        `${String(index + 1).padStart(2, '0')}. ` +
-                        `${item.title} — ` +
-                        `${item.price} EUR`
-                    );
-
-                }
+            // Close cart
+            cartOverlay.classList.remove(
+                'active'
             );
 
 
-        const itemText =
-            itemLines.join('\n');
+            // Show minimum order popup
+            if (minimumOrderModal) {
 
-
-        // =====================================================
-        // ADMIN LINKS
-        // =====================================================
-
-        const encodedItems =
-            cart
-                .map(item => {
-
-                    return (
-                        `${item.title}:${item.price}`
-                    );
-
-                })
-                .join('|');
-
-
-        const adminBase =
-            ADMIN_BASE +
-            `?i=${encodeURIComponent(orderId)}` +
-            `&n=${encodeURIComponent(username)}` +
-            `&e=${encodeURIComponent(email)}` +
-            `&t=${encodeURIComponent(total)}` +
-            `&p=${encodeURIComponent(encodedItems)}`;
-
-
-        const confirmUrl =
-            `${adminBase}&a=confirm`;
-
-
-        const rejectUrl =
-            `${adminBase}&a=reject`;
-
-
-        // =====================================================
-        // DISCORD PAYLOAD
-        // =====================================================
-
-        const webhookPayload = {
-
-            username:
-                'GrekoLounge',
-
-            embeds: [
-
-                {
-
-                    title:
-                        'New Order Received',
-
-                    description:
-                        `**Order Reference**\n` +
-                        `\`${orderId}\`\n\n` +
-
-                        `**Submitted**\n` +
-                        `${readableTime}`,
-
-                    color:
-                        0xD4AF37,
-
-                    fields: [
-
-                        {
-
-                            name:
-                                'CUSTOMER',
-
-                            value:
-                                `\`${escapeDiscord(
-                                    username
-                                )}\``,
-
-                            inline: true
-
-                        },
-
-                        {
-
-                            name:
-                                'EMAIL',
-
-                            value:
-                                `\`${escapeDiscord(
-                                    email
-                                )}\``,
-
-                            inline: true
-
-                        },
-
-                        {
-
-                            name:
-                                'STATUS',
-
-                            value:
-                                '🟡 Pending Review',
-
-                            inline: true
-
-                        },
-
-                        {
-
-                            name:
-                                'ORDER ITEMS',
-
-                            value:
-                                itemText
-                                    .substring(
-                                        0,
-                                        1000
-                                    ),
-
-                            inline: false
-
-                        },
-
-                        {
-
-                            name:
-                                'TOTAL',
-
-                            value:
-                                `**${total} EUR**`,
-
-                            inline: true
-
-                        },
-
-                        {
-
-                            name:
-                                'ITEM COUNT',
-
-                            value:
-                                `${cart.length}`,
-
-                            inline: true
-
-                        },
-
-                        {
-
-                            name:
-                                'ORDER MANAGEMENT',
-
-                            value:
-                                `[Confirm Order](${confirmUrl})\n` +
-                                `[Reject Order](${rejectUrl})`,
-
-                            inline: false
-
-                        }
-
-                    ],
-
-                    footer: {
-
-                        text:
-                            `GrekoLounge • ${orderId}`
-
-                    },
-
-                    timestamp
-
-                }
-
-            ]
-
-        };
-
-
-        // =====================================================
-        // DISCORD WEBHOOK URL
-        // =====================================================
-
-        /*
-            wait=true:
-            Discord returns a response when the message
-            has actually been accepted.
-
-            with_components=true:
-            Included for compatibility if you later add
-            Discord components/buttons.
-        */
-
-        const sendUrl =
-            WEBHOOK_URL +
-            (
-                WEBHOOK_URL.includes('?')
-                    ? '&'
-                    : '?'
-            ) +
-            'wait=true&with_components=true';
-
-
-        // =====================================================
-        // SEND TO DISCORD
-        // =====================================================
-
-        try {
-
-            console.log(
-                'Submitting order:',
-                orderId
-            );
-
-
-            const response =
-                await fetch(
-                    sendUrl,
-                    {
-
-                        method:
-                            'POST',
-
-                        headers:
-                            {
-                                'Content-Type':
-                                    'application/json'
-                            },
-
-                        body:
-                            JSON.stringify(
-                                webhookPayload
-                            )
-
-                    }
-                );
-
-
-            const responseText =
-                await response.text();
-
-
-            console.log(
-                'Discord HTTP status:',
-                response.status
-            );
-
-
-            console.log(
-                'Discord response:',
-                responseText
-            );
-
-
-            // =================================================
-            // ERROR
-            // =================================================
-
-            if (!response.ok) {
-
-                let readableError =
-                    responseText;
-
-
-                try {
-
-                    const parsed =
-                        JSON.parse(
-                            responseText
-                        );
-
-
-                    if (parsed.message) {
-
-                        readableError =
-                            parsed.message;
-
-                    }
-
-                } catch (_) {
-
-                    // Response was not JSON
-
-                }
-
-
-                throw new Error(
-                    `Discord returned HTTP ${response.status}: ` +
-                    `${readableError || 'Unknown error'}`
-                );
-
-            }
-
-
-            // =================================================
-            // SUCCESS
-            // =================================================
-
-            console.log(
-                'Order successfully submitted:',
-                orderId
-            );
-
-
-            // Close checkout
-
-            if (checkoutOverlay) {
-
-                checkoutOverlay.classList.remove(
+                minimumOrderModal.classList.add(
                     'active'
                 );
 
             }
 
-
-            // Clear form
-
-            if (checkoutUsername) {
-                checkoutUsername.value = '';
-            }
-
-
-            if (checkoutEmail) {
-                checkoutEmail.value = '';
-            }
-
-
-            // Clear cart
-
-            cart = [];
-
-            updateCart();
-
-
-            // Show success message ONLY NOW
-
-            showToast();
-
-
-        } catch (error) {
-
-            console.error(
-                'ORDER SUBMISSION ERROR:',
-                error
-            );
-
-
-            /*
-                IMPORTANT:
-
-                This shows the actual error instead of
-                hiding it behind "Please try again."
-            */
-
-            alert(
-                'Order could not be submitted.\n\n' +
-                error.message
-            );
-
-
-        } finally {
-
-            checkoutConfirm.disabled =
-                false;
-
-            checkoutConfirm.textContent =
-                'Confirm Order';
-
+            return;
         }
+
+
+        // ─────────────────────────────────────────────────────────────────────
+        // Continue To Checkout
+        // ─────────────────────────────────────────────────────────────────────
+
+        cartOverlay.classList.remove(
+            'active'
+        );
+
+        checkoutOverlay.classList.add(
+            'active'
+        );
+
+    });
+
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Minimum Order Popup
+    // ─────────────────────────────────────────────────────────────────────────
+
+    if (minimumOrderContinue) {
+
+        minimumOrderContinue.addEventListener(
+            'click',
+            () => {
+
+                minimumOrderModal.classList.remove(
+                    'active'
+                );
+
+                // Return to shopping
+                // The cart remains untouched.
+
+            }
+        );
 
     }
 
 
-    // =========================================================
-    // SUCCESS TOAST
-    // =========================================================
+    // Allow clicking outside the minimum-order modal to close it
+    if (minimumOrderModal) {
+
+        minimumOrderModal.addEventListener(
+            'click',
+            (e) => {
+
+                if (
+                    e.target ===
+                    minimumOrderModal
+                ) {
+
+                    minimumOrderModal.classList.remove(
+                        'active'
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Checkout Cancel
+    // ─────────────────────────────────────────────────────────────────────────
+
+    checkoutCancel.addEventListener(
+        'click',
+        () => {
+
+            checkoutOverlay.classList.remove(
+                'active'
+            );
+
+
+            checkoutUsername.value = '';
+            checkoutEmail.value = '';
+
+        }
+    );
+
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Checkout Confirm
+    // ─────────────────────────────────────────────────────────────────────────
+
+    checkoutConfirm.addEventListener(
+        'click',
+        async () => {
+
+            const username =
+                checkoutUsername.value.trim();
+
+            const email =
+                checkoutEmail.value.trim();
+
+
+            // Validate information
+            if (!username || !email) {
+
+                alert(
+                    'Please fill in both fields.'
+                );
+
+                return;
+            }
+
+
+            // Prevent double submissions
+            checkoutConfirm.disabled =
+                true;
+
+            checkoutConfirm.textContent =
+                'Submitting...';
+
+
+            // ─────────────────────────────────────────────────────────────────
+            // Order Data
+            // ─────────────────────────────────────────────────────────────────
+
+            const cartTotal =
+                cart.reduce(
+                    (sum, item) =>
+                        sum + item.price,
+                    0
+                );
+
+
+            const now =
+                new Date();
+
+
+            const timestamp =
+                now.toISOString();
+
+
+            const orderId =
+                `GL-${now.getFullYear()}` +
+                `${String(
+                    now.getMonth() + 1
+                ).padStart(2, '0')}` +
+                `${String(
+                    now.getDate()
+                ).padStart(2, '0')}-` +
+                `${Math.random()
+                    .toString(36)
+                    .substring(2, 7)
+                    .toUpperCase()}`;
+
+
+            const readableTime =
+                now.toLocaleString(
+                    'en-GB',
+                    {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                    }
+                );
+
+
+            // ─────────────────────────────────────────────────────────────────
+            // Order Breakdown
+            // ─────────────────────────────────────────────────────────────────
+
+            const W = 40;
+
+
+            const itemRows =
+                cart.map((item, i) => {
+
+                    const num =
+                        `  ${String(
+                            i + 1
+                        ).padStart(2, '0')}.  `;
+
+
+                    const price =
+                        `${item.price} EUR`;
+
+
+                    const name =
+                        item.title.substring(
+                            0,
+                            W -
+                            num.length -
+                            price.length -
+                            1
+                        );
+
+
+                    const gap =
+                        W -
+                        num.length -
+                        name.length -
+                        price.length;
+
+
+                    return (
+                        num +
+                        name +
+                        ' '.repeat(
+                            Math.max(
+                                1,
+                                gap
+                            )
+                        ) +
+                        price
+                    );
+
+                });
+
+
+            const divLine =
+                '  ' +
+                '─'.repeat(
+                    W - 2
+                );
+
+
+            const totalLabel =
+                '  TOTAL';
+
+
+            const totalVal =
+                `${cartTotal} EUR`;
+
+
+            const totalGap =
+                W -
+                totalLabel.length -
+                totalVal.length;
+
+
+            const totalRow =
+                totalLabel +
+                ' '.repeat(
+                    Math.max(
+                        1,
+                        totalGap
+                    )
+                ) +
+                totalVal;
+
+
+            const breakdownBlock =
+                '```\n' +
+                [
+                    ...itemRows,
+                    divLine,
+                    totalRow
+                ].join('\n') +
+                '\n```';
+
+
+            // ─────────────────────────────────────────────────────────────────
+            // Header Block
+            // ─────────────────────────────────────────────────────────────────
+
+            const headerBlock = [
+                '```',
+                `  ORDER REF    ${orderId}`,
+                `  STATUS       Pending Review`,
+                `  SUBMITTED    ${readableTime}`,
+                '```'
+            ].join('\n');
+
+
+            // ─────────────────────────────────────────────────────────────────
+            // Discord Webhook
+            // ─────────────────────────────────────────────────────────────────
+
+            // IMPORTANT:
+            // Replace this with your actual Discord webhook URL.
+            const WEBHOOK_URL =
+                'https://discord.com/api/webhooks/1537377526429523988/kTQaZ8voP2fZPlVaOR8SA-UMZqzjgZpyxzw9l_giKNeu8jozOalofk6m-zvPv7kFuzIc';
+
+
+            // ─────────────────────────────────────────────────────────────────
+            // Admin URL
+            // ─────────────────────────────────────────────────────────────────
+
+            const ADMIN_BASE =
+                'https://error-404y.github.io/GrekoLounge/admin.html';
+
+
+            const itemsSummary =
+                cart
+                    .map(
+                        item =>
+                            `${item.title}:${item.price}`
+                    )
+                    .join('|');
+
+
+            const adminBase =
+                `${ADMIN_BASE}` +
+                `?i=${encodeURIComponent(
+                    orderId
+                )}` +
+                `&n=${encodeURIComponent(
+                    username
+                )}` +
+                `&e=${encodeURIComponent(
+                    email
+                )}` +
+                `&t=${encodeURIComponent(
+                    cartTotal
+                )}` +
+                `&p=${encodeURIComponent(
+                    itemsSummary
+                )}`;
+
+
+            // ─────────────────────────────────────────────────────────────────
+            // Discord Payload
+            // ─────────────────────────────────────────────────────────────────
+
+            const webhookPayload = {
+
+                username:
+                    'GrekoLounge',
+
+
+                embeds: [
+                    {
+
+                        color:
+                            0xD4AF37,
+
+
+                        author: {
+                            name:
+                                'GREKOLOUNGE  ·  ORDER MANAGEMENT SYSTEM'
+                        },
+
+
+                        title:
+                            'New Order Received',
+
+
+                        description:
+                            headerBlock,
+
+
+                        fields: [
+
+                            {
+                                name:
+                                    'CUSTOMER',
+
+                                value:
+                                    `\`\`\`${username}\`\`\``,
+
+                                inline:
+                                    true
+                            },
+
+
+                            {
+                                name:
+                                    'EMAIL',
+
+                                value:
+                                    `\`\`\`${email}\`\`\``,
+
+                                inline:
+                                    true
+                            },
+
+
+                            {
+                                name:
+                                    '\u200b',
+
+                                value:
+                                    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+
+                                inline:
+                                    false
+                            },
+
+
+                            {
+                                name:
+                                    'ORDER BREAKDOWN',
+
+                                value:
+                                    breakdownBlock,
+
+                                inline:
+                                    false
+                            },
+
+
+                            {
+                                name:
+                                    '\u200b',
+
+                                value:
+                                    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
+
+                                inline:
+                                    false
+                            },
+
+
+                            {
+                                name:
+                                    'TOTAL CHARGED',
+
+                                value:
+                                    `**${cartTotal} EUR**`,
+
+                                inline:
+                                    true
+                            },
+
+
+                            {
+                                name:
+                                    'ITEMS',
+
+                                value:
+                                    `**${cart.length}** item${cart.length !== 1 ? 's' : ''}`,
+
+                                inline:
+                                    true
+                            },
+
+
+                            {
+                                name:
+                                    'STATUS',
+
+                                value:
+                                    '**Pending Review**',
+
+                                inline:
+                                    true
+                            }
+
+                        ],
+
+
+                        footer: {
+                            text:
+                                `GrekoLounge  ·  Secure Gift Card Exchange  ·  ${orderId}`
+                        },
+
+
+                        timestamp:
+                            timestamp
+
+                    }
+                ],
+
+
+                components: [
+
+                    {
+                        type:
+                            1,
+
+                        components: [
+
+                            {
+                                type:
+                                    2,
+
+                                style:
+                                    5,
+
+                                label:
+                                    'Confirm Order',
+
+                                url:
+                                    `${adminBase}&a=confirm`
+                            },
+
+
+                            {
+                                type:
+                                    2,
+
+                                style:
+                                    5,
+
+                                label:
+                                    'Reject Order',
+
+                                url:
+                                    `${adminBase}&a=reject`
+                            }
+
+                        ]
+                    }
+
+                ]
+
+            };
+
+
+            // ─────────────────────────────────────────────────────────────────
+            // Submit Order
+            // ─────────────────────────────────────────────────────────────────
+
+            try {
+
+                const response =
+                    await fetch(
+                        WEBHOOK_URL,
+                        {
+                            method:
+                                'POST',
+
+                            headers: {
+                                'Content-Type':
+                                    'application/json'
+                            },
+
+                            body:
+                                JSON.stringify(
+                                    webhookPayload
+                                )
+                        }
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        `Webhook failed with status ${response.status}`
+                    );
+
+                }
+
+
+                // ─────────────────────────────────────────────────────────────
+                // Successful Submission
+                // ─────────────────────────────────────────────────────────────
+
+                checkoutOverlay.classList.remove(
+                    'active'
+                );
+
+
+                checkoutUsername.value = '';
+                checkoutEmail.value = '';
+
+
+                cart = [];
+
+
+                updateCart();
+
+
+                showToast();
+
+
+            } catch (error) {
+
+                console.error(
+                    'Order submission failed:',
+                    error
+                );
+
+
+                alert(
+                    'Your order could not be submitted. Please try again.'
+                );
+
+
+            } finally {
+
+                checkoutConfirm.disabled =
+                    false;
+
+                checkoutConfirm.textContent =
+                    'Confirm Order';
+
+            }
+
+        }
+    );
+
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Success Toast
+    // ─────────────────────────────────────────────────────────────────────────
 
     function showToast() {
 
@@ -977,37 +896,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
 
-        // Start hidden
-
         toastMessage.classList.remove(
             'show'
         );
 
-        toastMessage.style.display =
-            'none';
 
-
-        // Force browser reflow
-
+        // Force browser to apply hidden state
         void toastMessage.offsetWidth;
 
 
-        // Show ONLY after successful order
+        toastMessage.classList.add(
+            'show'
+        );
 
-        toastMessage.style.display =
-            'block';
-
-
-        requestAnimationFrame(() => {
-
-            toastMessage.classList.add(
-                'show'
-            );
-
-        });
-
-
-        // Hide after 4 seconds
 
         setTimeout(() => {
 
@@ -1015,22 +916,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 'show'
             );
 
-
-            setTimeout(() => {
-
-                toastMessage.style.display =
-                    'none';
-
-            }, 300);
-
         }, 4000);
 
     }
 
 
-    // =========================================================
-    // CARD HOVER EFFECT
-    // =========================================================
+    // ─────────────────────────────────────────────────────────────────────────
+    // Mouse Glow Effect
+    // ─────────────────────────────────────────────────────────────────────────
 
     const cards =
         document.querySelectorAll(
@@ -1042,7 +935,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         card.addEventListener(
             'mousemove',
-            event => {
+            (e) => {
 
                 const glow =
                     card.querySelector(
@@ -1060,16 +953,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                 const x =
-                    event.clientX -
+                    e.clientX -
                     rect.left;
 
 
                 const y =
-                    event.clientY -
+                    e.clientY -
                     rect.top;
 
 
-                let glowColor =
+                let color =
                     'rgba(212, 175, 55, 0.15)';
 
 
@@ -1079,7 +972,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     )
                 ) {
 
-                    glowColor =
+                    color =
                         'rgba(61, 220, 132, 0.15)';
 
                 }
@@ -1091,7 +984,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     )
                 ) {
 
-                    glowColor =
+                    color =
                         'rgba(255, 255, 255, 0.15)';
 
                 }
@@ -1103,7 +996,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     )
                 ) {
 
-                    glowColor =
+                    color =
                         'rgba(102, 192, 244, 0.15)';
 
                 }
@@ -1115,7 +1008,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     )
                 ) {
 
-                    glowColor =
+                    color =
                         'rgba(0, 166, 255, 0.15)';
 
                 }
@@ -1124,7 +1017,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 glow.style.background =
                     `radial-gradient(
                         circle at ${x}px ${y}px,
-                        ${glowColor} 0%,
+                        ${color} 0%,
                         transparent 60%
                     )`;
 
@@ -1156,21 +1049,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // =========================================================
-    // EMAIL VALIDATION
-    // =========================================================
-
-    function isValidEmail(email) {
-
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-            .test(email);
-
-    }
-
-
-    // =========================================================
-    // HTML ESCAPE
-    // =========================================================
+    // ─────────────────────────────────────────────────────────────────────────
+    // HTML Escaping
+    // ─────────────────────────────────────────────────────────────────────────
 
     function escapeHtml(value) {
 
@@ -1199,27 +1080,6 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(
                 /'/g,
                 '&#039;'
-            );
-
-    }
-
-
-    // =========================================================
-    // DISCORD TEXT ESCAPE
-    // =========================================================
-
-    function escapeDiscord(value) {
-
-        return String(value)
-
-            .replace(
-                /\\/g,
-                '\\\\'
-            )
-
-            .replace(
-                /`/g,
-                '\\`'
             );
 
     }
