@@ -10,16 +10,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const SUPABASE_PUBLISHABLE_KEY =
         'sb_publishable_jaQjrYZSve2__Pw5594YEg_R_ou42Sm';
 
+
     if (
         !window.supabase ||
         typeof window.supabase.createClient !== 'function'
     ) {
+
         console.error(
             'GrekoLounge: Supabase library could not be loaded.'
         );
 
         return;
+
     }
+
 
     const supabaseClient =
         window.supabase.createClient(
@@ -34,10 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const MINIMUM_ORDER = 100;
 
-    // =========================================================
-    // DISCORD WEBHOOK
-    // Deinen eigenen Webhook hier einsetzen
-    // =========================================================
+
+    /* =========================================================
+       DISCORD WEBHOOK
+    ========================================================== */
 
     const DISCORD_WEBHOOK_URL =
         'https://discord.com/api/webhooks/1537377526429523988/kTQaZ8voP2fZPlVaOR8SA-UMZqzjgZpyxzw9l_giKNeu8jozOalofk6m-zvPv7kFuzIc';
@@ -1484,19 +1488,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const items =
             cart.map(item => ({
 
-                title:
+                product_name:
                     String(item.title),
 
-                value:
+                product_value:
                     Number(item.value) || 0,
 
-                price:
+                unit_price:
                     Number(item.price) || 0,
 
                 quantity:
                     Number(item.quantity) || 0,
 
-                item_total:
+                subtotal:
                     (
                         Number(item.price) || 0
                     ) *
@@ -1509,23 +1513,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return {
 
-            order_id:
+            order_number:
                 orderId,
 
-            username:
+            customer_name:
                 username,
 
-            email:
+            customer_email:
                 email,
 
             total:
                 total,
 
-            items:
-                items,
-
             status:
-                'pending'
+                'pending',
+
+            items:
+                items
 
         };
 
@@ -1534,38 +1538,249 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* =========================================================
        SAVE ORDER TO SUPABASE
+       IMPORTANT:
+       orders and order_items are separate tables.
     ========================================================== */
 
     async function saveOrderToSupabase(
         orderPayload
     ) {
 
+        console.log(
+            'GrekoLounge: Saving order to Supabase...'
+        );
+
+
+        /*
+         * Get current authenticated user if one exists.
+         * For normal website visitors this will usually be null.
+         */
+
+        let customerId = null;
+
+        try {
+
+            const {
+                data: authData
+            } =
+                await supabaseClient.auth.getUser();
+
+            if (
+                authData &&
+                authData.user &&
+                authData.user.id
+            ) {
+
+                customerId =
+                    authData.user.id;
+
+            }
+
+        } catch (authError) {
+
+            console.warn(
+                'GrekoLounge: Could not get authenticated user. Continuing as guest.',
+                authError
+            );
+
+        }
+
+
+        /* =====================================================
+           1. INSERT INTO orders
+        ====================================================== */
+
+        const orderRow = {
+
+            order_number:
+                orderPayload.order_number,
+
+            customer_id:
+                customerId,
+
+            customer_name:
+                orderPayload.customer_name,
+
+            customer_email:
+                orderPayload.customer_email,
+
+            total:
+                orderPayload.total,
+
+            status:
+                orderPayload.status
+
+        };
+
+
+        console.log(
+            'GrekoLounge: Order row:',
+            orderRow
+        );
+
+
+        /*
+         * IMPORTANT:
+         * No .select() here.
+         *
+         * This avoids requiring SELECT permission on the newly
+         * created order when using RLS.
+         */
+
         const {
-            data,
-            error
+            error: orderError
         } =
             await supabaseClient
                 .from('orders')
                 .insert(
-                    orderPayload
-                )
-                .select()
-                .single();
+                    orderRow
+                );
 
 
-        if (error) {
+        if (orderError) {
 
             console.error(
-                'GrekoLounge Supabase order error:',
-                error
+                'GrekoLounge: Supabase orders insert error:',
+                orderError
             );
+
+            throw orderError;
+
+        }
+
+
+        console.log(
+            'GrekoLounge: Order inserted successfully.'
+        );
+
+
+        /* =====================================================
+           2. FIND THE CREATED ORDER
+           
+           Because the order ID is generated by PostgreSQL,
+           we need it for order_items.
+        ====================================================== */
+
+        const {
+            data: createdOrder,
+            error: findOrderError
+        } =
+            await supabaseClient
+                .from('orders')
+                .select('id, order_number')
+                .eq(
+                    'order_number',
+                    orderPayload.order_number
+                )
+                .maybeSingle();
+
+
+        if (findOrderError) {
+
+            console.error(
+                'GrekoLounge: Could not retrieve created order:',
+                findOrderError
+            );
+
+            throw findOrderError;
+
+        }
+
+
+        if (!createdOrder) {
+
+            const error =
+                new Error(
+                    'Order was created but could not be retrieved.'
+                );
+
+            error.code =
+                'ORDER_NOT_FOUND';
 
             throw error;
 
         }
 
 
-        return data;
+        /* =====================================================
+           3. CREATE ORDER ITEMS
+        ====================================================== */
+
+        const orderItems =
+            orderPayload.items.map(item => ({
+
+                order_id:
+                    createdOrder.id,
+
+                product_id:
+                    null,
+
+                product_name:
+                    item.product_name,
+
+                product_value:
+                    item.product_value,
+
+                unit_price:
+                    item.unit_price,
+
+                quantity:
+                    item.quantity,
+
+                subtotal:
+                    item.subtotal
+
+            }));
+
+
+        if (
+            orderItems.length > 0
+        ) {
+
+            console.log(
+                'GrekoLounge: Saving order items...',
+                orderItems
+            );
+
+
+            const {
+                error: itemsError
+            } =
+                await supabaseClient
+                    .from('order_items')
+                    .insert(
+                        orderItems
+                    );
+
+
+            if (itemsError) {
+
+                console.error(
+                    'GrekoLounge: Supabase order_items insert error:',
+                    itemsError
+                );
+
+                throw itemsError;
+
+            }
+
+        }
+
+
+        console.log(
+            'GrekoLounge: Order items saved successfully.'
+        );
+
+
+        return {
+
+            id:
+                createdOrder.id,
+
+            order_number:
+                createdOrder.order_number
+
+        };
 
     }
 
@@ -1578,7 +1793,6 @@ document.addEventListener('DOMContentLoaded', () => {
         orderPayload
     ) {
 
-        // Kein Webhook eingetragen
         if (
             !DISCORD_WEBHOOK_URL ||
             DISCORD_WEBHOOK_URL ===
@@ -1599,10 +1813,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 .map(item => {
 
                     return (
-                        `• ${item.title}` +
+                        `• ${item.product_name}` +
                         ` × ${item.quantity}` +
                         ` — ${formatEuro(
-                            item.item_total
+                            item.subtotal
                         )} €`
                     );
 
@@ -1634,7 +1848,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             value:
                                 String(
-                                    orderPayload.order_id
+                                    orderPayload.order_number
                                 ),
 
                             inline:
@@ -1649,7 +1863,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             value:
                                 String(
-                                    orderPayload.username
+                                    orderPayload.customer_name
                                 ),
 
                             inline:
@@ -1664,7 +1878,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                             value:
                                 String(
-                                    orderPayload.email
+                                    orderPayload.customer_email
                                 ),
 
                             inline:
@@ -1777,9 +1991,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
 
-            // Discord-Fehler soll die Bestellung NICHT
-            // als fehlgeschlagen markieren.
-
             console.error(
                 'GrekoLounge: Discord notification failed:',
                 error
@@ -1883,7 +2094,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                     /* =========================================
-                       1. ORDER IN SUPABASE SPEICHERN
+                       1. SAVE TO SUPABASE
                     ========================================== */
 
                     await saveOrderToSupabase(
@@ -1892,7 +2103,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                     /* =========================================
-                       2. DISCORD BENACHRICHTIGEN
+                       2. SEND DISCORD
                     ========================================== */
 
                     await sendOrderToDiscord(
@@ -1901,7 +2112,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                     /* =========================================
-                       3. ERFOLG
+                       3. SUCCESS
                     ========================================== */
 
                     closeCheckout();
@@ -1957,7 +2168,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (
                         error &&
-                        error.code === '42501'
+                        (
+                            error.code === '42501' ||
+                            error.code === 'PGRST301'
+                        )
                     ) {
 
                         errorMessage =
@@ -1968,21 +2182,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (
                         error &&
-                        error.code === 'PGRST301'
+                        error.code === 'PGRST204'
                     ) {
 
                         errorMessage =
-                            'Your order could not be submitted because the request was not authorized.';
+                            'The database structure does not match the website code. Please refresh the Supabase schema.';
 
                     }
 
 
-                    checkoutError.textContent =
-                        errorMessage;
+                    if (
+                        error &&
+                        error.code === 'ORDER_NOT_FOUND'
+                    ) {
 
-                    checkoutError.classList.add(
-                        'show'
-                    );
+                        errorMessage =
+                            'The order was created but could not be loaded afterwards.';
+
+                    }
+
+
+                    if (
+                        checkoutError
+                    ) {
+
+                        checkoutError.textContent =
+                            errorMessage;
+
+                        checkoutError.classList.add(
+                            'show'
+                        );
+
+                    }
 
                 } finally {
 
