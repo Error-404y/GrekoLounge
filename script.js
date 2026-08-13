@@ -1,233 +1,85 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    let cart = [];
+    /* =========================================================
+       SUPABASE CONFIGURATION
+    ========================================================== */
+
+    const SUPABASE_URL =
+        'https://vsjrqeaubmoxjzlklzbg.supabase.co';
+
+    const SUPABASE_PUBLISHABLE_KEY =
+        'sb_publishable_jaQjrYZSve2__Pw5594YEg_R_ou42Sm';
+
+    if (
+        !window.supabase ||
+        typeof window.supabase.createClient !== 'function'
+    ) {
+        console.error(
+            'GrekoLounge: Supabase library could not be loaded.'
+        );
+
+        return;
+    }
+
+    const supabaseClient =
+        window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_PUBLISHABLE_KEY
+        );
+
+
+    /* =========================================================
+       CONFIGURATION
+    ========================================================== */
 
     const MINIMUM_ORDER = 100;
 
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Cart Elements
-    // ─────────────────────────────────────────────────────────────────────────
+    /* =========================================================
+       STATE
+    ========================================================== */
 
-    const cartBtn = document.getElementById('cartBtn');
-    const cartOverlay = document.getElementById('cartOverlay');
-    const closeCartBtn = document.getElementById('closeCart');
-    const cartItemsContainer = document.getElementById('cartItems');
-    const cartTotalEl = document.getElementById('cartTotal');
-    const addToCartBtns = document.querySelectorAll('.add-to-cart');
+    let cart = [];
 
+    let toastTimeout = null;
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Minimum Order Elements
-    // ─────────────────────────────────────────────────────────────────────────
 
-    const minimumOrderModal =
-        document.getElementById('minimumOrderModal');
+    /* =========================================================
+       ELEMENTS
+    ========================================================== */
 
-    const minimumOrderContinue =
-        document.getElementById('minimumOrderContinue');
+    const cartBtn =
+        document.getElementById('cartBtn');
 
+    const cartBadge =
+        document.getElementById('cartBadge');
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Cart Modal
-    // ─────────────────────────────────────────────────────────────────────────
+    const cartOverlay =
+        document.getElementById('cartOverlay');
 
-    cartBtn.addEventListener('click', () => {
-        cartOverlay.classList.add('active');
-    });
+    const closeCartBtn =
+        document.getElementById('closeCart');
 
+    const cartItemsContainer =
+        document.getElementById('cartItems');
 
-    closeCartBtn.addEventListener('click', () => {
-        cartOverlay.classList.remove('active');
-    });
+    const cartTotalEl =
+        document.getElementById('cartTotal');
 
+    const cartItemCountEl =
+        document.getElementById('cartItemCount');
 
-    cartOverlay.addEventListener('click', (e) => {
-        if (e.target === cartOverlay) {
-            cartOverlay.classList.remove('active');
-        }
-    });
-
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // Add To Cart
-    // ─────────────────────────────────────────────────────────────────────────
-
-    addToCartBtns.forEach(btn => {
-
-        btn.addEventListener('click', () => {
-
-            const title =
-                btn.getAttribute('data-title');
-
-            const price =
-                parseInt(
-                    btn.getAttribute('data-price'),
-                    10
-                );
-
-            const value =
-                btn.getAttribute('data-value');
-
-
-            // Prevent invalid prices from entering the cart
-            if (Number.isNaN(price)) {
-                console.error(
-                    `Invalid price for product: ${title}`
-                );
-
-                return;
-            }
-
-
-            cart.push({
-                title,
-                price,
-                value
-            });
-
-
-            updateCart();
-
-
-            // Button feedback
-            const originalText =
-                btn.textContent;
-
-
-            btn.textContent = 'Added!';
-
-            btn.style.background = '#4CAF50';
-            btn.style.color = 'white';
-            btn.style.borderColor = '#4CAF50';
-
-
-            setTimeout(() => {
-
-                btn.textContent =
-                    originalText;
-
-                btn.style.background = '';
-                btn.style.color = '';
-                btn.style.borderColor = '';
-
-            }, 1500);
-
-        });
-
-    });
-
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // Update Cart
-    // ─────────────────────────────────────────────────────────────────────────
-
-    function updateCart() {
-
-        cartBtn.textContent =
-            `Cart (${cart.length})`;
-
-
-        if (cart.length === 0) {
-
-            cartItemsContainer.innerHTML =
-                '<p class="empty-cart">Your cart is empty.</p>';
-
-            cartTotalEl.textContent = '0';
-
-            return;
-        }
-
-
-        cartItemsContainer.innerHTML = '';
-
-
-        let total = 0;
-
-
-        cart.forEach((item, index) => {
-
-            total += item.price;
-
-
-            const itemEl =
-                document.createElement('div');
-
-
-            itemEl.classList.add(
-                'cart-item'
-            );
-
-
-            itemEl.innerHTML = `
-                <div class="cart-item-info">
-                    <h4>${escapeHtml(item.title)}</h4>
-                    <p>${item.price} &euro;</p>
-                </div>
-
-                <button
-                    class="remove-item"
-                    data-index="${index}"
-                >
-                    Remove
-                </button>
-            `;
-
-
-            cartItemsContainer.appendChild(
-                itemEl
-            );
-
-        });
-
-
-        cartTotalEl.textContent =
-            total;
-
-
-        // Remove buttons
-        document
-            .querySelectorAll('.remove-item')
-            .forEach(btn => {
-
-                btn.addEventListener(
-                    'click',
-                    (e) => {
-
-                        const index =
-                            parseInt(
-                                e.target.getAttribute(
-                                    'data-index'
-                                ),
-                                10
-                            );
-
-
-                        cart.splice(
-                            index,
-                            1
-                        );
-
-
-                        updateCart();
-
-                    }
-                );
-
-            });
-
-    }
-
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // Checkout Elements
-    // ─────────────────────────────────────────────────────────────────────────
+    const cartSubtitle =
+        document.getElementById('cartSubtitle');
 
     const checkoutBtn =
-        document.querySelector('.checkout-btn');
+        document.getElementById('checkoutBtn');
 
     const checkoutOverlay =
         document.getElementById('checkoutOverlay');
+
+    const checkoutClose =
+        document.getElementById('checkoutClose');
 
     const checkoutCancel =
         document.getElementById('checkoutCancel');
@@ -241,689 +93,1754 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkoutEmail =
         document.getElementById('checkoutEmail');
 
+    const usernameError =
+        document.getElementById('usernameError');
+
+    const emailError =
+        document.getElementById('emailError');
+
+    const checkoutError =
+        document.getElementById('checkoutError');
+
+    const checkoutSummaryItems =
+        document.getElementById('checkoutSummaryItems');
+
+    const checkoutSummaryTotal =
+        document.getElementById('checkoutSummaryTotal');
+
+    const checkoutSummaryCount =
+        document.getElementById('checkoutSummaryCount');
+
     const toastMessage =
         document.getElementById('toastMessage');
 
+    const minimumProgress =
+        document.getElementById('minimumProgress');
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Checkout
-    // ─────────────────────────────────────────────────────────────────────────
+    const minimumOrderMessage =
+        document.getElementById('minimumOrderMessage');
 
-    checkoutBtn.addEventListener('click', () => {
+    const minimumOrderBox =
+        document.querySelector('.minimum-order');
 
-        // First check whether the cart is empty
-        if (cart.length === 0) {
+    const minimumOverlay =
+        document.getElementById('minimumOverlay');
 
-            alert(
-                'Your cart is empty! Please add some cards before checking out.'
-            );
+    const minimumContinue =
+        document.getElementById('minimumContinue');
 
-            return;
-        }
+    const minimumCurrentTotal =
+        document.getElementById('minimumCurrentTotal');
 
+    const minimumRemaining =
+        document.getElementById('minimumRemaining');
 
-        // Calculate current cart total
-        const cartTotal =
-            cart.reduce(
-                (sum, item) => sum + item.price,
-                0
-            );
+    const statusOverlay =
+        document.getElementById('statusOverlay');
 
+    const statusClose =
+        document.getElementById('statusClose');
 
-        // ─────────────────────────────────────────────────────────────────────
-        // Minimum Order Check
-        // ─────────────────────────────────────────────────────────────────────
+    const successOrderReference =
+        document.getElementById('successOrderReference');
 
-        if (cartTotal < MINIMUM_ORDER) {
+    const successOrderTotal =
+        document.getElementById('successOrderTotal');
 
-            // Close cart
-            cartOverlay.classList.remove(
-                'active'
-            );
-
-
-            // Show minimum order popup
-            if (minimumOrderModal) {
-
-                minimumOrderModal.classList.add(
-                    'active'
-                );
-
-            }
-
-            return;
-        }
+    const addToCartBtns =
+        document.querySelectorAll('.add-to-cart');
 
 
-        // ─────────────────────────────────────────────────────────────────────
-        // Continue To Checkout
-        // ─────────────────────────────────────────────────────────────────────
+    /* =========================================================
+       HELPERS
+    ========================================================== */
 
-        cartOverlay.classList.remove(
-            'active'
-        );
+    function formatEuro(value) {
 
-        checkoutOverlay.classList.add(
-            'active'
-        );
+        const number =
+            Number(value) || 0;
 
-    });
-
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // Minimum Order Popup
-    // ─────────────────────────────────────────────────────────────────────────
-
-    if (minimumOrderContinue) {
-
-        minimumOrderContinue.addEventListener(
-            'click',
-            () => {
-
-                minimumOrderModal.classList.remove(
-                    'active'
-                );
-
-                // Return to shopping
-                // The cart remains untouched.
-
+        return number.toLocaleString(
+            'en-GB',
+            {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
             }
         );
 
     }
 
 
-    // Allow clicking outside the minimum-order modal to close it
-    if (minimumOrderModal) {
+    function escapeHtml(value) {
 
-        minimumOrderModal.addEventListener(
-            'click',
-            (e) => {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
 
-                if (
-                    e.target ===
-                    minimumOrderModal
-                ) {
+    }
 
-                    minimumOrderModal.classList.remove(
-                        'active'
-                    );
 
-                }
+    function getCartTotal() {
 
-            }
+        return cart.reduce(
+            (sum, item) => {
+
+                const price =
+                    Number(item.price) || 0;
+
+                const quantity =
+                    Number(item.quantity) || 0;
+
+                return sum + price * quantity;
+
+            },
+            0
         );
 
     }
 
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Checkout Cancel
-    // ─────────────────────────────────────────────────────────────────────────
+    function getCartItemCount() {
 
-    checkoutCancel.addEventListener(
-        'click',
-        () => {
+        return cart.reduce(
+            (sum, item) => {
 
-            checkoutOverlay.classList.remove(
-                'active'
+                return sum +
+                    (Number(item.quantity) || 0);
+
+            },
+            0
+        );
+
+    }
+
+
+    function generateOrderId() {
+
+        const now =
+            new Date();
+
+        const random =
+            Math.random()
+                .toString(36)
+                .substring(2, 8)
+                .toUpperCase();
+
+        return (
+            `GL-${now.getFullYear()}` +
+            `${String(
+                now.getMonth() + 1
+            ).padStart(2, '0')}` +
+            `${String(
+                now.getDate()
+            ).padStart(2, '0')}-` +
+            `${random}`
+        );
+
+    }
+
+
+    function lockBody() {
+
+        document.body.style.overflow =
+            'hidden';
+
+    }
+
+
+    function unlockBody() {
+
+        const activeModal =
+            document.querySelector(
+                '.cart-overlay.active,' +
+                '.checkout-overlay.active,' +
+                '.minimum-overlay.active,' +
+                '.status-overlay.active'
             );
 
+        if (!activeModal) {
 
-            checkoutUsername.value = '';
-            checkoutEmail.value = '';
+            document.body.style.overflow =
+                '';
 
         }
-    );
 
+    }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Checkout Confirm
-    // ─────────────────────────────────────────────────────────────────────────
 
-    checkoutConfirm.addEventListener(
-        'click',
-        async () => {
+    /* =========================================================
+       TOAST
+    ========================================================== */
 
-            const username =
-                checkoutUsername.value.trim();
-
-            const email =
-                checkoutEmail.value.trim();
-
-
-            // Validate information
-            if (!username || !email) {
-
-                alert(
-                    'Please fill in both fields.'
-                );
-
-                return;
-            }
-
-
-            // Prevent double submissions
-            checkoutConfirm.disabled =
-                true;
-
-            checkoutConfirm.textContent =
-                'Submitting...';
-
-
-            // ─────────────────────────────────────────────────────────────────
-            // Order Data
-            // ─────────────────────────────────────────────────────────────────
-
-            const cartTotal =
-                cart.reduce(
-                    (sum, item) =>
-                        sum + item.price,
-                    0
-                );
-
-
-            const now =
-                new Date();
-
-
-            const timestamp =
-                now.toISOString();
-
-
-            const orderId =
-                `GL-${now.getFullYear()}` +
-                `${String(
-                    now.getMonth() + 1
-                ).padStart(2, '0')}` +
-                `${String(
-                    now.getDate()
-                ).padStart(2, '0')}-` +
-                `${Math.random()
-                    .toString(36)
-                    .substring(2, 7)
-                    .toUpperCase()}`;
-
-
-            const readableTime =
-                now.toLocaleString(
-                    'en-GB',
-                    {
-                        day: '2-digit',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit'
-                    }
-                );
-
-
-            // ─────────────────────────────────────────────────────────────────
-            // Order Breakdown
-            // ─────────────────────────────────────────────────────────────────
-
-            const W = 40;
-
-
-            const itemRows =
-                cart.map((item, i) => {
-
-                    const num =
-                        `  ${String(
-                            i + 1
-                        ).padStart(2, '0')}.  `;
-
-
-                    const price =
-                        `${item.price} EUR`;
-
-
-                    const name =
-                        item.title.substring(
-                            0,
-                            W -
-                            num.length -
-                            price.length -
-                            1
-                        );
-
-
-                    const gap =
-                        W -
-                        num.length -
-                        name.length -
-                        price.length;
-
-
-                    return (
-                        num +
-                        name +
-                        ' '.repeat(
-                            Math.max(
-                                1,
-                                gap
-                            )
-                        ) +
-                        price
-                    );
-
-                });
-
-
-            const divLine =
-                '  ' +
-                '─'.repeat(
-                    W - 2
-                );
-
-
-            const totalLabel =
-                '  TOTAL';
-
-
-            const totalVal =
-                `${cartTotal} EUR`;
-
-
-            const totalGap =
-                W -
-                totalLabel.length -
-                totalVal.length;
-
-
-            const totalRow =
-                totalLabel +
-                ' '.repeat(
-                    Math.max(
-                        1,
-                        totalGap
-                    )
-                ) +
-                totalVal;
-
-
-            const breakdownBlock =
-                '```\n' +
-                [
-                    ...itemRows,
-                    divLine,
-                    totalRow
-                ].join('\n') +
-                '\n```';
-
-
-            // ─────────────────────────────────────────────────────────────────
-            // Header Block
-            // ─────────────────────────────────────────────────────────────────
-
-            const headerBlock = [
-                '```',
-                `  ORDER REF    ${orderId}`,
-                `  STATUS       Pending Review`,
-                `  SUBMITTED    ${readableTime}`,
-                '```'
-            ].join('\n');
-
-
-            // ─────────────────────────────────────────────────────────────────
-            // Discord Webhook
-            // ─────────────────────────────────────────────────────────────────
-
-            // IMPORTANT:
-            // Replace this with your actual Discord webhook URL.
-            const WEBHOOK_URL =
-                'https://discord.com/api/webhooks/1537377526429523988/kTQaZ8voP2fZPlVaOR8SA-UMZqzjgZpyxzw9l_giKNeu8jozOalofk6m-zvPv7kFuzIc';
-
-
-            // ─────────────────────────────────────────────────────────────────
-            // Admin URL
-            // ─────────────────────────────────────────────────────────────────
-
-            const ADMIN_BASE =
-                'https://error-404y.github.io/GrekoLounge/admin.html';
-
-
-            const itemsSummary =
-                cart
-                    .map(
-                        item =>
-                            `${item.title}:${item.price}`
-                    )
-                    .join('|');
-
-
-            const adminBase =
-                `${ADMIN_BASE}` +
-                `?i=${encodeURIComponent(
-                    orderId
-                )}` +
-                `&n=${encodeURIComponent(
-                    username
-                )}` +
-                `&e=${encodeURIComponent(
-                    email
-                )}` +
-                `&t=${encodeURIComponent(
-                    cartTotal
-                )}` +
-                `&p=${encodeURIComponent(
-                    itemsSummary
-                )}`;
-
-
-            // ─────────────────────────────────────────────────────────────────
-            // Discord Payload
-            // ─────────────────────────────────────────────────────────────────
-
-            const webhookPayload = {
-
-                username:
-                    'GrekoLounge',
-
-
-                embeds: [
-                    {
-
-                        color:
-                            0xD4AF37,
-
-
-                        author: {
-                            name:
-                                'GREKOLOUNGE  ·  ORDER MANAGEMENT SYSTEM'
-                        },
-
-
-                        title:
-                            'New Order Received',
-
-
-                        description:
-                            headerBlock,
-
-
-                        fields: [
-
-                            {
-                                name:
-                                    'CUSTOMER',
-
-                                value:
-                                    `\`\`\`${username}\`\`\``,
-
-                                inline:
-                                    true
-                            },
-
-
-                            {
-                                name:
-                                    'EMAIL',
-
-                                value:
-                                    `\`\`\`${email}\`\`\``,
-
-                                inline:
-                                    true
-                            },
-
-
-                            {
-                                name:
-                                    '\u200b',
-
-                                value:
-                                    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
-
-                                inline:
-                                    false
-                            },
-
-
-                            {
-                                name:
-                                    'ORDER BREAKDOWN',
-
-                                value:
-                                    breakdownBlock,
-
-                                inline:
-                                    false
-                            },
-
-
-                            {
-                                name:
-                                    '\u200b',
-
-                                value:
-                                    '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
-
-                                inline:
-                                    false
-                            },
-
-
-                            {
-                                name:
-                                    'TOTAL CHARGED',
-
-                                value:
-                                    `**${cartTotal} EUR**`,
-
-                                inline:
-                                    true
-                            },
-
-
-                            {
-                                name:
-                                    'ITEMS',
-
-                                value:
-                                    `**${cart.length}** item${cart.length !== 1 ? 's' : ''}`,
-
-                                inline:
-                                    true
-                            },
-
-
-                            {
-                                name:
-                                    'STATUS',
-
-                                value:
-                                    '**Pending Review**',
-
-                                inline:
-                                    true
-                            }
-
-                        ],
-
-
-                        footer: {
-                            text:
-                                `GrekoLounge  ·  Secure Gift Card Exchange  ·  ${orderId}`
-                        },
-
-
-                        timestamp:
-                            timestamp
-
-                    }
-                ],
-
-
-                components: [
-
-                    {
-                        type:
-                            1,
-
-                        components: [
-
-                            {
-                                type:
-                                    2,
-
-                                style:
-                                    5,
-
-                                label:
-                                    'Confirm Order',
-
-                                url:
-                                    `${adminBase}&a=confirm`
-                            },
-
-
-                            {
-                                type:
-                                    2,
-
-                                style:
-                                    5,
-
-                                label:
-                                    'Reject Order',
-
-                                url:
-                                    `${adminBase}&a=reject`
-                            }
-
-                        ]
-                    }
-
-                ]
-
-            };
-
-
-            // ─────────────────────────────────────────────────────────────────
-            // Submit Order
-            // ─────────────────────────────────────────────────────────────────
-
-            try {
-
-                const response =
-                    await fetch(
-                        WEBHOOK_URL,
-                        {
-                            method:
-                                'POST',
-
-                            headers: {
-                                'Content-Type':
-                                    'application/json'
-                            },
-
-                            body:
-                                JSON.stringify(
-                                    webhookPayload
-                                )
-                        }
-                    );
-
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        `Webhook failed with status ${response.status}`
-                    );
-
-                }
-
-
-                // ─────────────────────────────────────────────────────────────
-                // Successful Submission
-                // ─────────────────────────────────────────────────────────────
-
-                checkoutOverlay.classList.remove(
-                    'active'
-                );
-
-
-                checkoutUsername.value = '';
-                checkoutEmail.value = '';
-
-
-                cart = [];
-
-
-                updateCart();
-
-
-                showToast();
-
-
-            } catch (error) {
-
-                console.error(
-                    'Order submission failed:',
-                    error
-                );
-
-
-                alert(
-                    'Your order could not be submitted. Please try again.'
-                );
-
-
-            } finally {
-
-                checkoutConfirm.disabled =
-                    false;
-
-                checkoutConfirm.textContent =
-                    'Confirm Order';
-
-            }
-
-        }
-    );
-
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // Success Toast
-    // ─────────────────────────────────────────────────────────────────────────
-
-    function showToast() {
+    function showToast(message) {
 
         if (!toastMessage) {
             return;
         }
 
+        clearTimeout(toastTimeout);
+
+        toastMessage.textContent =
+            message;
 
         toastMessage.classList.remove(
             'show'
         );
 
-
-        // Force browser to apply hidden state
         void toastMessage.offsetWidth;
-
 
         toastMessage.classList.add(
             'show'
         );
 
+        toastTimeout =
+            setTimeout(() => {
 
-        setTimeout(() => {
+                toastMessage.classList.remove(
+                    'show'
+                );
 
-            toastMessage.classList.remove(
-                'show'
-            );
-
-        }, 4000);
+            }, 3000);
 
     }
 
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Mouse Glow Effect
-    // ─────────────────────────────────────────────────────────────────────────
+    /* =========================================================
+       MODALS
+    ========================================================== */
+
+    function openCart() {
+
+        if (!cartOverlay) {
+            return;
+        }
+
+        cartOverlay.classList.add(
+            'active'
+        );
+
+        lockBody();
+
+    }
+
+
+    function closeCart() {
+
+        if (!cartOverlay) {
+            return;
+        }
+
+        cartOverlay.classList.remove(
+            'active'
+        );
+
+        unlockBody();
+
+    }
+
+
+    function openCheckout() {
+
+        if (!checkoutOverlay) {
+            return;
+        }
+
+        updateCheckoutSummary();
+
+        checkoutOverlay.classList.add(
+            'active'
+        );
+
+        lockBody();
+
+        setTimeout(() => {
+
+            if (checkoutUsername) {
+                checkoutUsername.focus();
+            }
+
+        }, 100);
+
+    }
+
+
+    function closeCheckout() {
+
+        if (!checkoutOverlay) {
+            return;
+        }
+
+        checkoutOverlay.classList.remove(
+            'active'
+        );
+
+        clearCheckoutErrors();
+
+        unlockBody();
+
+    }
+
+
+    function openMinimumModal() {
+
+        if (!minimumOverlay) {
+            return;
+        }
+
+        const total =
+            getCartTotal();
+
+        const remaining =
+            Math.max(
+                0,
+                MINIMUM_ORDER - total
+            );
+
+        if (minimumCurrentTotal) {
+
+            minimumCurrentTotal.textContent =
+                formatEuro(total);
+
+        }
+
+        if (minimumRemaining) {
+
+            minimumRemaining.textContent =
+                formatEuro(remaining);
+
+        }
+
+        minimumOverlay.classList.add(
+            'active'
+        );
+
+        lockBody();
+
+    }
+
+
+    function closeMinimumModal() {
+
+        if (!minimumOverlay) {
+            return;
+        }
+
+        minimumOverlay.classList.remove(
+            'active'
+        );
+
+        unlockBody();
+
+    }
+
+
+    function openStatusModal(
+        orderId,
+        total
+    ) {
+
+        if (!statusOverlay) {
+            return;
+        }
+
+        if (successOrderReference) {
+
+            successOrderReference.textContent =
+                orderId;
+
+        }
+
+        if (successOrderTotal) {
+
+            successOrderTotal.textContent =
+                formatEuro(total);
+
+        }
+
+        statusOverlay.classList.add(
+            'active'
+        );
+
+        lockBody();
+
+    }
+
+
+    function closeStatusModal() {
+
+        if (!statusOverlay) {
+            return;
+        }
+
+        statusOverlay.classList.remove(
+            'active'
+        );
+
+        unlockBody();
+
+    }
+
+
+    /* =========================================================
+       MODAL EVENTS
+    ========================================================== */
+
+    if (cartBtn) {
+
+        cartBtn.addEventListener(
+            'click',
+            openCart
+        );
+
+    }
+
+
+    if (closeCartBtn) {
+
+        closeCartBtn.addEventListener(
+            'click',
+            closeCart
+        );
+
+    }
+
+
+    if (cartOverlay) {
+
+        cartOverlay.addEventListener(
+            'click',
+            event => {
+
+                if (
+                    event.target ===
+                    cartOverlay
+                ) {
+
+                    closeCart();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    if (checkoutClose) {
+
+        checkoutClose.addEventListener(
+            'click',
+            closeCheckout
+        );
+
+    }
+
+
+    if (checkoutCancel) {
+
+        checkoutCancel.addEventListener(
+            'click',
+            closeCheckout
+        );
+
+    }
+
+
+    if (checkoutOverlay) {
+
+        checkoutOverlay.addEventListener(
+            'click',
+            event => {
+
+                if (
+                    event.target ===
+                    checkoutOverlay
+                ) {
+
+                    closeCheckout();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    if (minimumContinue) {
+
+        minimumContinue.addEventListener(
+            'click',
+            closeMinimumModal
+        );
+
+    }
+
+
+    if (minimumOverlay) {
+
+        minimumOverlay.addEventListener(
+            'click',
+            event => {
+
+                if (
+                    event.target ===
+                    minimumOverlay
+                ) {
+
+                    closeMinimumModal();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    if (statusClose) {
+
+        statusClose.addEventListener(
+            'click',
+            closeStatusModal
+        );
+
+    }
+
+
+    if (statusOverlay) {
+
+        statusOverlay.addEventListener(
+            'click',
+            event => {
+
+                if (
+                    event.target ===
+                    statusOverlay
+                ) {
+
+                    closeStatusModal();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    document.addEventListener(
+        'keydown',
+        event => {
+
+            if (
+                event.key !== 'Escape'
+            ) {
+
+                return;
+
+            }
+
+            closeCart();
+            closeCheckout();
+            closeMinimumModal();
+            closeStatusModal();
+
+        }
+    );
+
+
+    /* =========================================================
+       ADD TO CART
+    ========================================================== */
+
+    addToCartBtns.forEach(button => {
+
+        button.addEventListener(
+            'click',
+            () => {
+
+                const title =
+                    button.getAttribute(
+                        'data-title'
+                    );
+
+                const price =
+                    Number(
+                        button.getAttribute(
+                            'data-price'
+                        )
+                    );
+
+                const value =
+                    Number(
+                        button.getAttribute(
+                            'data-value'
+                        )
+                    );
+
+
+                if (
+                    !title ||
+                    !Number.isFinite(price) ||
+                    price <= 0
+                ) {
+
+                    showToast(
+                        'This product could not be added to your cart.'
+                    );
+
+                    return;
+
+                }
+
+
+                const existing =
+                    cart.find(
+                        item =>
+                            item.title === title &&
+                            Number(item.price) === price
+                    );
+
+
+                if (existing) {
+
+                    existing.quantity += 1;
+
+                } else {
+
+                    cart.push({
+
+                        title:
+                            title,
+
+                        price:
+                            price,
+
+                        value:
+                            Number.isFinite(value)
+                                ? value
+                                : 0,
+
+                        quantity:
+                            1
+
+                    });
+
+                }
+
+
+                updateCart();
+
+                animateCartBadge();
+
+
+                const originalText =
+                    button.textContent;
+
+                button.textContent =
+                    'Added';
+
+                button.classList.add(
+                    'added-state'
+                );
+
+
+                setTimeout(() => {
+
+                    button.textContent =
+                        originalText;
+
+                    button.classList.remove(
+                        'added-state'
+                    );
+
+                }, 1200);
+
+
+                showToast(
+                    `${title} added to your cart.`
+                );
+
+            }
+        );
+
+    });
+
+
+    /* =========================================================
+       UPDATE CART
+    ========================================================== */
+
+    function updateCart() {
+
+        const total =
+            getCartTotal();
+
+        const itemCount =
+            getCartItemCount();
+
+
+        if (cartBadge) {
+
+            cartBadge.textContent =
+                itemCount;
+
+        }
+
+
+        if (cartSubtitle) {
+
+            cartSubtitle.textContent =
+                `${itemCount} ${
+                    itemCount === 1
+                        ? 'item'
+                        : 'items'
+                }`;
+
+        }
+
+
+        if (cartItemCountEl) {
+
+            cartItemCountEl.textContent =
+                itemCount;
+
+        }
+
+
+        if (cartTotalEl) {
+
+            cartTotalEl.textContent =
+                formatEuro(total);
+
+        }
+
+
+        updateMinimumProgress(
+            total
+        );
+
+
+        if (checkoutBtn) {
+
+            checkoutBtn.disabled =
+                cart.length === 0 ||
+                total < MINIMUM_ORDER;
+
+        }
+
+
+        if (!cartItemsContainer) {
+            return;
+        }
+
+
+        if (cart.length === 0) {
+
+            cartItemsContainer.innerHTML = `
+                <div class="empty-cart">
+
+                    <div class="empty-cart-title">
+                        Your cart is empty
+                    </div>
+
+                    <p>
+                        Select a gift card to get started.
+                    </p>
+
+                </div>
+            `;
+
+            return;
+
+        }
+
+
+        cartItemsContainer.innerHTML =
+            '';
+
+
+        cart.forEach(
+            (item, index) => {
+
+                const quantity =
+                    Number(item.quantity) || 0;
+
+                const price =
+                    Number(item.price) || 0;
+
+                const itemTotal =
+                    quantity * price;
+
+
+                const itemEl =
+                    document.createElement(
+                        'div'
+                    );
+
+                itemEl.className =
+                    'cart-item';
+
+
+                itemEl.innerHTML = `
+
+                    <div class="cart-item-info">
+
+                        <h4>
+                            ${escapeHtml(
+                                item.title
+                            )}
+                        </h4>
+
+                        <p>
+                            ${formatEuro(
+                                itemTotal
+                            )} €
+                        </p>
+
+                        <div class="cart-item-meta">
+                            ${formatEuro(
+                                price
+                            )} € per item
+                        </div>
+
+                        <div class="cart-item-controls">
+
+                            <button
+                                class="quantity-btn"
+                                data-action="decrease"
+                                data-index="${index}"
+                                aria-label="Decrease quantity"
+                            >
+                                −
+                            </button>
+
+                            <span class="quantity-value">
+                                ${quantity}
+                            </span>
+
+                            <button
+                                class="quantity-btn"
+                                data-action="increase"
+                                data-index="${index}"
+                                aria-label="Increase quantity"
+                            >
+                                +
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <button
+                        class="remove-item"
+                        data-action="remove"
+                        data-index="${index}"
+                    >
+                        Remove
+                    </button>
+
+                `;
+
+
+                cartItemsContainer.appendChild(
+                    itemEl
+                );
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       CART CONTROLS
+    ========================================================== */
+
+    if (cartItemsContainer) {
+
+        cartItemsContainer.addEventListener(
+            'click',
+            event => {
+
+                const button =
+                    event.target.closest(
+                        'button'
+                    );
+
+                if (!button) {
+                    return;
+                }
+
+
+                const index =
+                    Number(
+                        button.getAttribute(
+                            'data-index'
+                        )
+                    );
+
+
+                if (
+                    !Number.isInteger(index) ||
+                    !cart[index]
+                ) {
+
+                    return;
+
+                }
+
+
+                const action =
+                    button.getAttribute(
+                        'data-action'
+                    );
+
+
+                if (
+                    action ===
+                    'increase'
+                ) {
+
+                    cart[index].quantity += 1;
+
+                    updateCart();
+
+                    animateCartBadge();
+
+                    return;
+
+                }
+
+
+                if (
+                    action ===
+                    'decrease'
+                ) {
+
+                    cart[index].quantity -= 1;
+
+
+                    if (
+                        cart[index].quantity <= 0
+                    ) {
+
+                        cart.splice(
+                            index,
+                            1
+                        );
+
+                    }
+
+
+                    updateCart();
+
+                    animateCartBadge();
+
+                    return;
+
+                }
+
+
+                if (
+                    action ===
+                    'remove'
+                ) {
+
+                    const removedItem =
+                        cart[index];
+
+
+                    cart.splice(
+                        index,
+                        1
+                    );
+
+
+                    updateCart();
+
+                    animateCartBadge();
+
+
+                    showToast(
+                        `${removedItem.title} removed from your cart.`
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       MINIMUM ORDER
+    ========================================================== */
+
+    function updateMinimumProgress(total) {
+
+        if (
+            !minimumProgress ||
+            !minimumOrderMessage ||
+            !minimumOrderBox
+        ) {
+
+            return;
+
+        }
+
+
+        const percentage =
+            Math.min(
+                (total / MINIMUM_ORDER) * 100,
+                100
+            );
+
+
+        minimumProgress.style.width =
+            `${percentage}%`;
+
+
+        if (
+            total >= MINIMUM_ORDER
+        ) {
+
+            minimumProgress.classList.add(
+                'complete'
+            );
+
+            minimumOrderBox.classList.add(
+                'complete'
+            );
+
+            minimumOrderMessage.textContent =
+                'Minimum order reached. You can proceed to checkout.';
+
+        } else {
+
+            minimumProgress.classList.remove(
+                'complete'
+            );
+
+            minimumOrderBox.classList.remove(
+                'complete'
+            );
+
+
+            const remaining =
+                MINIMUM_ORDER - total;
+
+
+            minimumOrderMessage.textContent =
+                `Add ${formatEuro(
+                    remaining
+                )} € more to reach the minimum order.`;
+
+        }
+
+    }
+
+
+    /* =========================================================
+       CART BADGE ANIMATION
+    ========================================================== */
+
+    function animateCartBadge() {
+
+        if (!cartBadge) {
+            return;
+        }
+
+        cartBadge.classList.remove(
+            'bump'
+        );
+
+        void cartBadge.offsetWidth;
+
+        cartBadge.classList.add(
+            'bump'
+        );
+
+    }
+
+
+    /* =========================================================
+       CHECKOUT
+    ========================================================== */
+
+    if (checkoutBtn) {
+
+        checkoutBtn.addEventListener(
+            'click',
+            () => {
+
+                const total =
+                    getCartTotal();
+
+
+                if (
+                    cart.length === 0
+                ) {
+
+                    showToast(
+                        'Your cart is empty.'
+                    );
+
+                    return;
+
+                }
+
+
+                if (
+                    total < MINIMUM_ORDER
+                ) {
+
+                    openMinimumModal();
+
+                    return;
+
+                }
+
+
+                closeCart();
+
+                openCheckout();
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       CHECKOUT SUMMARY
+    ========================================================== */
+
+    function updateCheckoutSummary() {
+
+        if (
+            !checkoutSummaryItems ||
+            !checkoutSummaryCount ||
+            !checkoutSummaryTotal
+        ) {
+
+            return;
+
+        }
+
+
+        checkoutSummaryItems.innerHTML =
+            '';
+
+
+        const itemCount =
+            getCartItemCount();
+
+        const total =
+            getCartTotal();
+
+
+        checkoutSummaryCount.textContent =
+            `${itemCount} ${
+                itemCount === 1
+                    ? 'item'
+                    : 'items'
+            }`;
+
+
+        checkoutSummaryTotal.textContent =
+            formatEuro(total);
+
+
+        cart.forEach(item => {
+
+            const quantity =
+                Number(item.quantity) || 0;
+
+            const price =
+                Number(item.price) || 0;
+
+            const itemTotal =
+                quantity * price;
+
+
+            const row =
+                document.createElement(
+                    'div'
+                );
+
+            row.className =
+                'checkout-summary-item';
+
+
+            row.innerHTML = `
+
+                <span>
+                    ${escapeHtml(
+                        item.title
+                    )}
+                    ${
+                        quantity > 1
+                            ? ` × ${quantity}`
+                            : ''
+                    }
+                </span>
+
+                <span>
+                    ${formatEuro(
+                        itemTotal
+                    )} €
+                </span>
+
+            `;
+
+
+            checkoutSummaryItems.appendChild(
+                row
+            );
+
+        });
+
+    }
+
+
+    /* =========================================================
+       FORM VALIDATION
+    ========================================================== */
+
+    function clearCheckoutErrors() {
+
+        if (usernameError) {
+            usernameError.textContent = '';
+        }
+
+        if (emailError) {
+            emailError.textContent = '';
+        }
+
+        if (checkoutError) {
+
+            checkoutError.textContent =
+                '';
+
+            checkoutError.classList.remove(
+                'show'
+            );
+
+        }
+
+        if (checkoutUsername) {
+
+            checkoutUsername.classList.remove(
+                'input-error'
+            );
+
+        }
+
+        if (checkoutEmail) {
+
+            checkoutEmail.classList.remove(
+                'input-error'
+            );
+
+        }
+
+    }
+
+
+    function validateCheckout() {
+
+        clearCheckoutErrors();
+
+        const username =
+            checkoutUsername.value.trim();
+
+        const email =
+            checkoutEmail.value.trim();
+
+        let valid =
+            true;
+
+
+        if (!username) {
+
+            usernameError.textContent =
+                'Please enter your username.';
+
+            checkoutUsername.classList.add(
+                'input-error'
+            );
+
+            valid =
+                false;
+
+        } else if (
+            username.length < 2
+        ) {
+
+            usernameError.textContent =
+                'Username must contain at least 2 characters.';
+
+            checkoutUsername.classList.add(
+                'input-error'
+            );
+
+            valid =
+                false;
+
+        } else if (
+            username.length > 100
+        ) {
+
+            usernameError.textContent =
+                'Username is too long.';
+
+            checkoutUsername.classList.add(
+                'input-error'
+            );
+
+            valid =
+                false;
+
+        }
+
+
+        const emailPattern =
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
+        if (!email) {
+
+            emailError.textContent =
+                'Please enter your email address.';
+
+            checkoutEmail.classList.add(
+                'input-error'
+            );
+
+            valid =
+                false;
+
+        } else if (
+            !emailPattern.test(email)
+        ) {
+
+            emailError.textContent =
+                'Please enter a valid email address.';
+
+            checkoutEmail.classList.add(
+                'input-error'
+            );
+
+            valid =
+                false;
+
+        } else if (
+            email.length > 254
+        ) {
+
+            emailError.textContent =
+                'Email address is too long.';
+
+            checkoutEmail.classList.add(
+                'input-error'
+            );
+
+            valid =
+                false;
+
+        }
+
+
+        return valid;
+
+    }
+
+
+    /* =========================================================
+       ORDER PAYLOAD
+    ========================================================== */
+
+    function createOrderPayload(
+        orderId,
+        username,
+        email,
+        total
+    ) {
+
+        const items =
+            cart.map(item => ({
+
+                title:
+                    String(item.title),
+
+                value:
+                    Number(item.value) || 0,
+
+                price:
+                    Number(item.price) || 0,
+
+                quantity:
+                    Number(item.quantity) || 0,
+
+                item_total:
+                    (
+                        Number(item.price) || 0
+                    ) *
+                    (
+                        Number(item.quantity) || 0
+                    )
+
+            }));
+
+
+        return {
+
+            order_id:
+                orderId,
+
+            username:
+                username,
+
+            email:
+                email,
+
+            total:
+                total,
+
+            items:
+                items,
+
+            status:
+                'pending'
+
+        };
+
+    }
+
+
+    /* =========================================================
+       SAVE ORDER TO SUPABASE
+    ========================================================== */
+
+    async function saveOrderToSupabase(
+        orderPayload
+    ) {
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from('orders')
+                .insert(
+                    orderPayload
+                )
+                .select()
+                .single();
+
+
+        if (error) {
+
+            console.error(
+                'GrekoLounge Supabase order error:',
+                error
+            );
+
+            throw error;
+
+        }
+
+
+        return data;
+
+    }
+
+
+    /* =========================================================
+       CHECKOUT SUBMISSION
+    ========================================================== */
+
+    if (checkoutConfirm) {
+
+        checkoutConfirm.addEventListener(
+            'click',
+            async () => {
+
+                if (
+                    checkoutConfirm.disabled
+                ) {
+
+                    return;
+
+                }
+
+
+                if (
+                    !validateCheckout()
+                ) {
+
+                    return;
+
+                }
+
+
+                if (
+                    cart.length === 0
+                ) {
+
+                    checkoutError.textContent =
+                        'Your cart is empty.';
+
+                    checkoutError.classList.add(
+                        'show'
+                    );
+
+                    return;
+
+                }
+
+
+                const total =
+                    getCartTotal();
+
+
+                if (
+                    total < MINIMUM_ORDER
+                ) {
+
+                    closeCheckout();
+
+                    openMinimumModal();
+
+                    return;
+
+                }
+
+
+                const username =
+                    checkoutUsername.value.trim();
+
+                const email =
+                    checkoutEmail.value.trim();
+
+
+                checkoutConfirm.disabled =
+                    true;
+
+                checkoutConfirm.textContent =
+                    'Submitting...';
+
+                clearCheckoutErrors();
+
+
+                const orderId =
+                    generateOrderId();
+
+
+                try {
+
+                    const orderPayload =
+                        createOrderPayload(
+                            orderId,
+                            username,
+                            email,
+                            total
+                        );
+
+
+                    await saveOrderToSupabase(
+                        orderPayload
+                    );
+
+
+                    closeCheckout();
+
+
+                    checkoutUsername.value =
+                        '';
+
+                    checkoutEmail.value =
+                        '';
+
+
+                    cart =
+                        [];
+
+
+                    updateCart();
+
+
+                    openStatusModal(
+                        orderId,
+                        total
+                    );
+
+
+                    showToast(
+                        'Order submitted successfully.'
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        'GrekoLounge: Order submission failed:',
+                        error
+                    );
+
+
+                    let errorMessage =
+                        'We could not submit your order at this time. Please try again later.';
+
+
+                    if (
+                        error &&
+                        error.code === '23505'
+                    ) {
+
+                        errorMessage =
+                            'This order reference already exists. Please try again.';
+
+                    }
+
+
+                    if (
+                        error &&
+                        error.code === '42501'
+                    ) {
+
+                        errorMessage =
+                            'Database permissions are not configured correctly.';
+
+                    }
+
+
+                    if (
+                        error &&
+                        error.code === 'PGRST301'
+                    ) {
+
+                        errorMessage =
+                            'Your order could not be submitted because the request was not authorized.';
+
+                    }
+
+
+                    checkoutError.textContent =
+                        errorMessage;
+
+                    checkoutError.classList.add(
+                        'show'
+                    );
+
+                } finally {
+
+                    checkoutConfirm.disabled =
+                        false;
+
+                    checkoutConfirm.textContent =
+                        'Submit Order';
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       ENTER KEY
+    ========================================================== */
+
+    [
+        checkoutUsername,
+        checkoutEmail
+    ].forEach(input => {
+
+        if (!input) {
+            return;
+        }
+
+
+        input.addEventListener(
+            'keydown',
+            event => {
+
+                if (
+                    event.key === 'Enter'
+                ) {
+
+                    event.preventDefault();
+
+                    if (
+                        checkoutConfirm &&
+                        !checkoutConfirm.disabled
+                    ) {
+
+                        checkoutConfirm.click();
+
+                    }
+
+                }
+
+            }
+        );
+
+    });
+
+
+    /* =========================================================
+       LIVE FORM VALIDATION
+    ========================================================== */
+
+    if (checkoutUsername) {
+
+        checkoutUsername.addEventListener(
+            'input',
+            () => {
+
+                checkoutUsername.classList.remove(
+                    'input-error'
+                );
+
+                usernameError.textContent =
+                    '';
+
+            }
+        );
+
+    }
+
+
+    if (checkoutEmail) {
+
+        checkoutEmail.addEventListener(
+            'input',
+            () => {
+
+                checkoutEmail.classList.remove(
+                    'input-error'
+                );
+
+                emailError.textContent =
+                    '';
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       PRODUCT CARD GLOW
+    ========================================================== */
 
     const cards =
         document.querySelectorAll(
@@ -935,7 +1852,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         card.addEventListener(
             'mousemove',
-            (e) => {
+            event => {
 
                 const glow =
                     card.querySelector(
@@ -953,12 +1870,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
                 const x =
-                    e.clientX -
+                    event.clientX -
                     rect.left;
 
-
                 const y =
-                    e.clientY -
+                    event.clientY -
                     rect.top;
 
 
@@ -1049,39 +1965,57 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // HTML Escaping
-    // ─────────────────────────────────────────────────────────────────────────
+    /* =========================================================
+       SUPABASE CONNECTION TEST
+    ========================================================== */
 
-    function escapeHtml(value) {
+    async function testSupabaseConnection() {
 
-        return String(value)
+        try {
 
-            .replace(
-                /&/g,
-                '&amp;'
-            )
+            const {
+                error
+            } =
+                await supabaseClient
+                    .from('orders')
+                    .select('id')
+                    .limit(1);
 
-            .replace(
-                /</g,
-                '&lt;'
-            )
 
-            .replace(
-                />/g,
-                '&gt;'
-            )
+            if (error) {
 
-            .replace(
-                /"/g,
-                '&quot;'
-            )
+                console.warn(
+                    'GrekoLounge: Supabase connection/table test:',
+                    error.message
+                );
 
-            .replace(
-                /'/g,
-                '&#039;'
+                return;
+
+            }
+
+
+            console.log(
+                'GrekoLounge: Supabase connection successful.'
             );
 
+        } catch (error) {
+
+            console.warn(
+                'GrekoLounge: Supabase connection test failed:',
+                error
+            );
+
+        }
+
     }
+
+
+    /* =========================================================
+       INITIALIZE
+    ========================================================== */
+
+    updateCart();
+
+    testSupabaseConnection();
 
 });
