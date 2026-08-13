@@ -34,6 +34,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const MINIMUM_ORDER = 100;
 
+    // =========================================================
+    // DISCORD WEBHOOK
+    // Deinen eigenen Webhook hier einsetzen
+    // =========================================================
+
+    const DISCORD_WEBHOOK_URL =
+        'https://discord.com/api/webhooks/1537377526429523988/kTQaZ8voP2fZPlVaOR8SA-UMZqzjgZpyxzw9l_giKNeu8jozOalofk6m-zvPv7kFuzIc';
+
 
     /* =========================================================
        STATE
@@ -1563,6 +1571,226 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     /* =========================================================
+       SEND ORDER TO DISCORD
+    ========================================================== */
+
+    async function sendOrderToDiscord(
+        orderPayload
+    ) {
+
+        // Kein Webhook eingetragen
+        if (
+            !DISCORD_WEBHOOK_URL ||
+            DISCORD_WEBHOOK_URL ===
+            'DEIN_DISCORD_WEBHOOK_HIER'
+        ) {
+
+            console.warn(
+                'GrekoLounge: Discord webhook is not configured.'
+            );
+
+            return;
+
+        }
+
+
+        const itemsText =
+            orderPayload.items
+                .map(item => {
+
+                    return (
+                        `• ${item.title}` +
+                        ` × ${item.quantity}` +
+                        ` — ${formatEuro(
+                            item.item_total
+                        )} €`
+                    );
+
+                })
+                .join('\n');
+
+
+        const discordPayload = {
+
+            username:
+                'GrekoLounge Orders',
+
+            embeds: [
+
+                {
+
+                    title:
+                        '🛒 Neue GrekoLounge Bestellung',
+
+                    color:
+                        0xD4AF37,
+
+                    fields: [
+
+                        {
+
+                            name:
+                                '🆔 Order ID',
+
+                            value:
+                                String(
+                                    orderPayload.order_id
+                                ),
+
+                            inline:
+                                true
+
+                        },
+
+                        {
+
+                            name:
+                                '👤 Username',
+
+                            value:
+                                String(
+                                    orderPayload.username
+                                ),
+
+                            inline:
+                                true
+
+                        },
+
+                        {
+
+                            name:
+                                '📧 E-Mail',
+
+                            value:
+                                String(
+                                    orderPayload.email
+                                ),
+
+                            inline:
+                                false
+
+                        },
+
+                        {
+
+                            name:
+                                '💰 Gesamtbetrag',
+
+                            value:
+                                `${formatEuro(
+                                    orderPayload.total
+                                )} €`,
+
+                            inline:
+                                true
+
+                        },
+
+                        {
+
+                            name:
+                                '📌 Status',
+
+                            value:
+                                String(
+                                    orderPayload.status
+                                ),
+
+                            inline:
+                                true
+
+                        },
+
+                        {
+
+                            name:
+                                '📦 Produkte',
+
+                            value:
+                                itemsText ||
+                                'Keine Produkte',
+
+                            inline:
+                                false
+
+                        }
+
+                    ],
+
+                    footer: {
+
+                        text:
+                            'GrekoLounge Orders'
+
+                    },
+
+                    timestamp:
+                        new Date().toISOString()
+
+                }
+
+            ]
+
+        };
+
+
+        try {
+
+            const response =
+                await fetch(
+                    DISCORD_WEBHOOK_URL,
+                    {
+
+                        method:
+                            'POST',
+
+                        headers: {
+
+                            'Content-Type':
+                                'application/json'
+
+                        },
+
+                        body:
+                            JSON.stringify(
+                                discordPayload
+                            )
+
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    `Discord webhook failed: ${response.status}`
+                );
+
+            }
+
+
+            console.log(
+                'GrekoLounge: Discord notification sent successfully.'
+            );
+
+
+        } catch (error) {
+
+            // Discord-Fehler soll die Bestellung NICHT
+            // als fehlgeschlagen markieren.
+
+            console.error(
+                'GrekoLounge: Discord notification failed:',
+                error
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
        CHECKOUT SUBMISSION
     ========================================================== */
 
@@ -1654,10 +1882,27 @@ document.addEventListener('DOMContentLoaded', () => {
                         );
 
 
+                    /* =========================================
+                       1. ORDER IN SUPABASE SPEICHERN
+                    ========================================== */
+
                     await saveOrderToSupabase(
                         orderPayload
                     );
 
+
+                    /* =========================================
+                       2. DISCORD BENACHRICHTIGEN
+                    ========================================== */
+
+                    await sendOrderToDiscord(
+                        orderPayload
+                    );
+
+
+                    /* =========================================
+                       3. ERFOLG
+                    ========================================== */
 
                     closeCheckout();
 
