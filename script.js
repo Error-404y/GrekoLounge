@@ -36,12 +36,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const MINIMUM_ORDER = 100;
 
     /*
-     * IMPORTANT:
+     * Discord webhook is NEVER stored in this file.
      *
-     * NEVER put the Discord webhook URL in this file.
-     *
-     * Discord webhook is stored as a Supabase Edge Function
-     * secret and is used server-side by dynamic-handler.
+     * The webhook is stored securely as a Supabase
+     * Edge Function secret.
      */
 
     const DISCORD_FUNCTION_URL =
@@ -53,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ========================================================== */
 
     let cart = [];
+
     let toastTimeout = null;
 
 
@@ -169,7 +168,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function formatEuro(value) {
 
-        const number = Number(value) || 0;
+        const number =
+            Number(value) || 0;
 
         return number.toLocaleString(
             'en-GB',
@@ -178,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 maximumFractionDigits: 2
             }
         );
+
     }
 
 
@@ -189,6 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
+
     }
 
 
@@ -208,6 +210,7 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             0
         );
+
     }
 
 
@@ -222,12 +225,14 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             0
         );
+
     }
 
 
     function generateOrderId() {
 
-        const now = new Date();
+        const now =
+            new Date();
 
         const random =
             Math.random()
@@ -237,16 +242,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return (
             `GL-${now.getFullYear()}` +
-            `${String(now.getMonth() + 1).padStart(2, '0')}` +
-            `${String(now.getDate()).padStart(2, '0')}-` +
+            `${String(
+                now.getMonth() + 1
+            ).padStart(2, '0')}` +
+            `${String(
+                now.getDate()
+            ).padStart(2, '0')}-` +
             `${random}`
         );
+
     }
 
 
     function lockBody() {
 
-        document.body.style.overflow = 'hidden';
+        document.body.style.overflow =
+            'hidden';
+
     }
 
 
@@ -261,8 +273,12 @@ document.addEventListener('DOMContentLoaded', () => {
             );
 
         if (!activeModal) {
-            document.body.style.overflow = '';
+
+            document.body.style.overflow =
+                '';
+
         }
+
     }
 
 
@@ -278,20 +294,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
         clearTimeout(toastTimeout);
 
-        toastMessage.textContent = message;
+        toastMessage.textContent =
+            message;
 
-        toastMessage.classList.remove('show');
+        toastMessage.classList.remove(
+            'show'
+        );
 
         void toastMessage.offsetWidth;
 
-        toastMessage.classList.add('show');
+        toastMessage.classList.add(
+            'show'
+        );
 
         toastTimeout =
             setTimeout(() => {
 
-                toastMessage.classList.remove('show');
+                toastMessage.classList.remove(
+                    'show'
+                );
 
             }, 3000);
+
     }
 
 
@@ -308,6 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cartOverlay.classList.add('active');
 
         lockBody();
+
     }
 
 
@@ -320,6 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cartOverlay.classList.remove('active');
 
         unlockBody();
+
     }
 
 
@@ -342,6 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
         }, 100);
+
     }
 
 
@@ -356,6 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearCheckoutErrors();
 
         unlockBody();
+
     }
 
 
@@ -365,7 +393,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const total = getCartTotal();
+        const total =
+            getCartTotal();
 
         const remaining =
             Math.max(
@@ -375,20 +404,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         if (minimumCurrentTotal) {
+
             minimumCurrentTotal.textContent =
                 formatEuro(total);
+
         }
 
 
         if (minimumRemaining) {
+
             minimumRemaining.textContent =
                 formatEuro(remaining);
+
         }
 
 
         minimumOverlay.classList.add('active');
 
         lockBody();
+
     }
 
 
@@ -401,6 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
         minimumOverlay.classList.remove('active');
 
         unlockBody();
+
     }
 
 
@@ -415,6 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             successOrderReference.textContent =
                 orderId;
+
         }
 
 
@@ -422,12 +458,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             successOrderTotal.textContent =
                 formatEuro(total);
+
         }
 
 
         statusOverlay.classList.add('active');
 
         lockBody();
+
     }
 
 
@@ -440,6 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
         statusOverlay.classList.remove('active');
 
         unlockBody();
+
     }
 
 
@@ -453,6 +492,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'click',
             openCart
         );
+
     }
 
 
@@ -462,6 +502,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'click',
             closeCart
         );
+
     }
 
 
@@ -471,12 +512,17 @@ document.addEventListener('DOMContentLoaded', () => {
             'click',
             event => {
 
-                if (event.target === cartOverlay) {
+                if (
+                    event.target === cartOverlay
+                ) {
+
                     closeCart();
+
                 }
 
             }
         );
+
     }
 
 
@@ -486,6 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'click',
             closeCheckout
         );
+
     }
 
 
@@ -495,6 +542,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'click',
             closeCheckout
         );
+
     }
 
 
@@ -504,12 +552,17 @@ document.addEventListener('DOMContentLoaded', () => {
             'click',
             event => {
 
-                if (event.target === checkoutOverlay) {
+                if (
+                    event.target === checkoutOverlay
+                ) {
+
                     closeCheckout();
+
                 }
 
             }
         );
+
     }
 
 
@@ -519,6 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'click',
             closeMinimumModal
         );
+
     }
 
 
@@ -528,12 +582,17 @@ document.addEventListener('DOMContentLoaded', () => {
             'click',
             event => {
 
-                if (event.target === minimumOverlay) {
+                if (
+                    event.target === minimumOverlay
+                ) {
+
                     closeMinimumModal();
+
                 }
 
             }
         );
+
     }
 
 
@@ -543,6 +602,7 @@ document.addEventListener('DOMContentLoaded', () => {
             'click',
             closeStatusModal
         );
+
     }
 
 
@@ -552,12 +612,17 @@ document.addEventListener('DOMContentLoaded', () => {
             'click',
             event => {
 
-                if (event.target === statusOverlay) {
+                if (
+                    event.target === statusOverlay
+                ) {
+
                     closeStatusModal();
+
                 }
 
             }
         );
+
     }
 
 
@@ -589,16 +654,22 @@ document.addEventListener('DOMContentLoaded', () => {
             () => {
 
                 const title =
-                    button.getAttribute('data-title');
+                    button.getAttribute(
+                        'data-title'
+                    );
 
                 const price =
                     Number(
-                        button.getAttribute('data-price')
+                        button.getAttribute(
+                            'data-price'
+                        )
                     );
 
                 const value =
                     Number(
-                        button.getAttribute('data-value')
+                        button.getAttribute(
+                            'data-value'
+                        )
                     );
 
 
@@ -613,6 +684,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     );
 
                     return;
+
                 }
 
 
@@ -632,17 +704,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     cart.push({
 
-                        title,
-                        price,
+                        title:
+                            title,
+
+                        price:
+                            price,
 
                         value:
                             Number.isFinite(value)
                                 ? value
                                 : 0,
 
-                        quantity: 1
+                        quantity:
+                            1
 
                     });
+
                 }
 
 
@@ -654,9 +731,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const originalText =
                     button.textContent;
 
-                button.textContent = 'Added';
+                button.textContent =
+                    'Added';
 
-                button.classList.add('added-state');
+                button.classList.add(
+                    'added-state'
+                );
 
 
                 setTimeout(() => {
@@ -674,6 +754,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast(
                     `${title} added to your cart.`
                 );
+
             }
         );
 
@@ -697,6 +778,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             cartBadge.textContent =
                 itemCount;
+
         }
 
 
@@ -708,6 +790,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         ? 'item'
                         : 'items'
                 }`;
+
         }
 
 
@@ -715,6 +798,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             cartItemCountEl.textContent =
                 itemCount;
+
         }
 
 
@@ -722,6 +806,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             cartTotalEl.textContent =
                 formatEuro(total);
+
         }
 
 
@@ -733,6 +818,7 @@ document.addEventListener('DOMContentLoaded', () => {
             checkoutBtn.disabled =
                 cart.length === 0 ||
                 total < MINIMUM_ORDER;
+
         }
 
 
@@ -755,6 +841,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
 
             return;
+
         }
 
 
@@ -838,8 +925,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 cartItemsContainer.appendChild(
                     itemEl
                 );
+
             }
         );
+
     }
 
 
@@ -863,7 +952,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const index =
                     Number(
-                        button.getAttribute('data-index')
+                        button.getAttribute(
+                            'data-index'
+                        )
                     );
 
 
@@ -871,12 +962,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     !Number.isInteger(index) ||
                     !cart[index]
                 ) {
+
                     return;
+
                 }
 
 
                 const action =
-                    button.getAttribute('data-action');
+                    button.getAttribute(
+                        'data-action'
+                    );
 
 
                 if (action === 'increase') {
@@ -888,6 +983,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     animateCartBadge();
 
                     return;
+
                 }
 
 
@@ -896,8 +992,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     cart[index].quantity -= 1;
 
 
-                    if (cart[index].quantity <= 0) {
+                    if (
+                        cart[index].quantity <= 0
+                    ) {
+
                         cart.splice(index, 1);
+
                     }
 
 
@@ -906,6 +1006,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     animateCartBadge();
 
                     return;
+
                 }
 
 
@@ -913,6 +1014,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const removedItem =
                         cart[index];
+
 
                     cart.splice(index, 1);
 
@@ -924,10 +1026,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast(
                         `${removedItem.title} removed from your cart.`
                     );
+
                 }
 
             }
         );
+
     }
 
 
@@ -942,7 +1046,9 @@ document.addEventListener('DOMContentLoaded', () => {
             !minimumOrderMessage ||
             !minimumOrderBox
         ) {
+
             return;
+
         }
 
 
@@ -979,7 +1085,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             minimumOrderMessage.textContent =
                 `Add ${formatEuro(remaining)} € more to reach the minimum order.`;
+
         }
+
     }
 
 
@@ -998,6 +1106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         void cartBadge.offsetWidth;
 
         cartBadge.classList.add('bump');
+
     }
 
 
@@ -1022,6 +1131,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     );
 
                     return;
+
                 }
 
 
@@ -1030,14 +1140,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     openMinimumModal();
 
                     return;
+
                 }
 
 
                 closeCart();
 
                 openCheckout();
+
             }
         );
+
     }
 
 
@@ -1052,7 +1165,9 @@ document.addEventListener('DOMContentLoaded', () => {
             !checkoutSummaryCount ||
             !checkoutSummaryTotal
         ) {
+
             return;
+
         }
 
 
@@ -1116,7 +1231,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
             checkoutSummaryItems.appendChild(row);
+
         });
+
     }
 
 
@@ -1139,6 +1256,7 @@ document.addEventListener('DOMContentLoaded', () => {
             checkoutError.textContent = '';
 
             checkoutError.classList.remove('show');
+
         }
 
         if (checkoutUsername) {
@@ -1146,6 +1264,7 @@ document.addEventListener('DOMContentLoaded', () => {
             checkoutUsername.classList.remove(
                 'input-error'
             );
+
         }
 
         if (checkoutEmail) {
@@ -1153,7 +1272,9 @@ document.addEventListener('DOMContentLoaded', () => {
             checkoutEmail.classList.remove(
                 'input-error'
             );
+
         }
+
     }
 
 
@@ -1221,6 +1342,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             valid = false;
+
         }
 
 
@@ -1272,10 +1394,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             valid = false;
+
         }
 
 
         return valid;
+
     }
 
 
@@ -1335,7 +1459,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             items:
                 items
+
         };
+
     }
 
 
@@ -1343,7 +1469,9 @@ document.addEventListener('DOMContentLoaded', () => {
        CREATE ORDER THROUGH SECURE RPC
     ========================================================== */
 
-    async function createOrderThroughRPC(orderPayload) {
+    async function createOrderThroughRPC(
+        orderPayload
+    ) {
 
         console.log(
             'GrekoLounge: Creating order through secure RPC...'
@@ -1383,6 +1511,7 @@ document.addEventListener('DOMContentLoaded', () => {
             );
 
             throw error;
+
         }
 
 
@@ -1408,29 +1537,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 'ORDER_RPC_FAILED';
 
             throw rpcError;
+
         }
 
 
         return data;
+
     }
 
 
     /* =========================================================
-       SEND ORDER TO DISCORD THROUGH EDGE FUNCTION
+       DISCORD NOTIFICATION
        
        IMPORTANT:
-       NO DISCORD WEBHOOK URL IS STORED IN THIS FILE.
-       
-       Browser
-           ↓
-       Supabase Edge Function
-           ↓
-       Discord webhook
-       
-       The Discord webhook remains a Supabase secret.
+       NEVER put the Discord webhook URL here.
+
+       The browser calls the Supabase Edge Function.
+       The Edge Function reads DISCORD_WEBHOOK_URL
+       from its secure Supabase secret.
     ========================================================== */
 
-    async function sendOrderToDiscord(orderPayload) {
+    async function sendOrderToDiscord(
+        orderPayload
+    ) {
 
         console.log(
             'GrekoLounge: Sending Discord notification through Edge Function...'
@@ -1438,24 +1567,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         try {
-
-            /*
-             * Get the current authenticated session if one exists.
-             *
-             * For anonymous customers, the publishable key is
-             * used for the Edge Function request.
-             */
-
-            const {
-                data: authData
-            } =
-                await supabaseClient.auth.getSession();
-
-
-            const accessToken =
-                authData?.session?.access_token ||
-                SUPABASE_PUBLISHABLE_KEY;
-
 
             const response =
                 await fetch(
@@ -1465,7 +1576,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         headers: {
                             'Authorization':
-                                `Bearer ${accessToken}`,
+                                `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
 
                             'apikey':
                                 SUPABASE_PUBLISHABLE_KEY,
@@ -1475,9 +1586,32 @@ document.addEventListener('DOMContentLoaded', () => {
                         },
 
                         body:
-                            JSON.stringify(
-                                orderPayload
-                            )
+                            JSON.stringify({
+
+                                order_number:
+                                    orderPayload.order_number,
+
+                                customer_name:
+                                    orderPayload.customer_name,
+
+                                customer_email:
+                                    orderPayload.customer_email,
+
+                                total:
+                                    orderPayload.total,
+
+                                status:
+                                    orderPayload.status ||
+                                    'pending',
+
+                                items:
+                                    orderPayload.items,
+
+                                id:
+                                    orderPayload.id ||
+                                    null
+
+                            })
                     }
                 );
 
@@ -1493,6 +1627,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch {
 
                 result = null;
+
             }
 
 
@@ -1507,7 +1642,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const error =
                     new Error(
                         result?.error ||
-                        `Discord function returned HTTP ${response.status}`
+                        `Discord Edge Function returned HTTP ${response.status}`
                     );
 
                 error.code =
@@ -1515,6 +1650,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     `HTTP_${response.status}`;
 
                 throw error;
+
             }
 
 
@@ -1534,6 +1670,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'DISCORD_NOTIFICATION_FAILED';
 
                 throw error;
+
             }
 
 
@@ -1544,7 +1681,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             return {
                 success: true,
-                ...(result || {})
+                ...result
             };
 
 
@@ -1557,23 +1694,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
             /*
-             * The order itself remains successful.
-             *
-             * Discord is only a notification service.
+             * The order has already been saved.
+             * Discord is only a notification.
              */
 
             return {
                 success: false,
-
                 error:
                     error?.message ||
-                    'Discord notification failed.',
-
-                code:
-                    error?.code ||
-                    'DISCORD_NOTIFICATION_FAILED'
+                    'Discord notification failed.'
             };
+
         }
+
     }
 
 
@@ -1607,9 +1740,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         checkoutError.classList.add(
                             'show'
                         );
+
                     }
 
                     return;
+
                 }
 
 
@@ -1624,6 +1759,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     openMinimumModal();
 
                     return;
+
                 }
 
 
@@ -1694,7 +1830,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                                 order_number:
                                     createdOrder.order_number ||
-                                    orderPayload.order_number
+                                    orderPayload.order_number,
+
+                                status:
+                                    createdOrder.status ||
+                                    orderPayload.status
                             }
                         );
 
@@ -1767,6 +1907,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         errorMessage =
                             'This order reference already exists. Please try again.';
+
                     }
 
 
@@ -1780,6 +1921,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         errorMessage =
                             'Database permissions are not configured correctly.';
+
                     }
 
 
@@ -1790,16 +1932,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         errorMessage =
                             'The database structure does not match the website code.';
-                    }
 
-
-                    if (
-                        error &&
-                        error.code === 'PGRST202'
-                    ) {
-
-                        errorMessage =
-                            'The secure order function was not found. Please check that create_order_secure exists in Supabase.';
                     }
 
 
@@ -1810,6 +1943,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         errorMessage =
                             'The order was created but could not be loaded afterwards.';
+
                     }
 
 
@@ -1821,6 +1955,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         errorMessage =
                             error.message ||
                             'The secure order function rejected the order.';
+
                     }
 
 
@@ -1832,6 +1967,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         checkoutError.classList.add(
                             'show'
                         );
+
                     }
 
                 } finally {
@@ -1841,10 +1977,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     checkoutConfirm.textContent =
                         'Submit Order';
+
                 }
 
             }
         );
+
     }
 
 
@@ -1877,11 +2015,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     ) {
 
                         checkoutConfirm.click();
+
                     }
+
                 }
 
             }
         );
+
     });
 
 
@@ -1905,6 +2046,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             }
         );
+
     }
 
 
@@ -1924,6 +2066,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             }
         );
+
     }
 
 
@@ -1979,6 +2122,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     color =
                         'rgba(61, 220, 132, 0.15)';
+
                 }
 
 
@@ -1990,6 +2134,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     color =
                         'rgba(255, 255, 255, 0.15)';
+
                 }
 
 
@@ -2001,6 +2146,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     color =
                         'rgba(102, 192, 244, 0.15)';
+
                 }
 
 
@@ -2012,6 +2158,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     color =
                         'rgba(0, 166, 255, 0.15)';
+
                 }
 
 
@@ -2021,6 +2168,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${color} 0%,
                         transparent 60%
                     )`;
+
             }
         );
 
@@ -2042,8 +2190,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 glow.style.background =
                     'radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%)';
+
             }
         );
+
     });
 
 
@@ -2072,6 +2222,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
 
                 return;
+
             }
 
 
@@ -2079,14 +2230,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 'GrekoLounge: Supabase connection successful.'
             );
 
-
         } catch (error) {
 
             console.warn(
                 'GrekoLounge: Supabase connection test failed:',
                 error
             );
+
         }
+
     }
 
 
