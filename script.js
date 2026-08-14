@@ -1,8 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    /* =========================================================
-       SUPABASE CONFIGURATION
-    ========================================================== */
 
     const SUPABASE_URL =
         'https://vsjrqeaubmoxjzlklzbg.supabase.co';
@@ -29,35 +26,19 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
 
-    /* =========================================================
-       CONFIGURATION
-    ========================================================== */
 
     const MINIMUM_ORDER = 100;
 
-    /*
-     * Discord webhook is NEVER stored in this file.
-     *
-     * The webhook is stored securely as a Supabase
-     * Edge Function secret.
-     */
 
     const DISCORD_FUNCTION_URL =
         `${SUPABASE_URL}/functions/v1/dynamic-handler`;
 
 
-    /* =========================================================
-       STATE
-    ========================================================== */
 
     let cart = [];
 
     let toastTimeout = null;
 
-
-    /* =========================================================
-       ELEMENTS
-    ========================================================== */
 
     const cartBtn =
         document.getElementById('cartBtn');
@@ -162,9 +143,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.add-to-cart');
 
 
-    /* =========================================================
-       HELPERS
-    ========================================================== */
 
     function formatEuro(value) {
 
@@ -282,9 +260,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /* =========================================================
-       TOAST
-    ========================================================== */
 
     function showToast(message) {
 
@@ -319,9 +294,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /* =========================================================
-       MODALS
-    ========================================================== */
 
     function openCart() {
 
@@ -482,10 +454,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /* =========================================================
-       MODAL EVENTS
-    ========================================================== */
-
     if (cartBtn) {
 
         cartBtn.addEventListener(
@@ -643,9 +611,6 @@ document.addEventListener('DOMContentLoaded', () => {
     );
 
 
-    /* =========================================================
-       ADD TO CART
-    ========================================================== */
 
     addToCartBtns.forEach(button => {
 
@@ -761,9 +726,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    /* =========================================================
-       UPDATE CART
-    ========================================================== */
 
     function updateCart() {
 
@@ -932,9 +894,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /* =========================================================
-       CART CONTROLS
-    ========================================================== */
 
     if (cartItemsContainer) {
 
@@ -1035,9 +994,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /* =========================================================
-       MINIMUM ORDER
-    ========================================================== */
 
     function updateMinimumProgress(total) {
 
@@ -1091,9 +1047,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /* =========================================================
-       CART BADGE ANIMATION
-    ========================================================== */
 
     function animateCartBadge() {
 
@@ -1110,9 +1063,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /* =========================================================
-       CHECKOUT
-    ========================================================== */
 
     if (checkoutBtn) {
 
@@ -1154,9 +1104,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /* =========================================================
-       CHECKOUT SUMMARY
-    ========================================================== */
 
     function updateCheckoutSummary() {
 
@@ -1237,9 +1184,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /* =========================================================
-       FORM VALIDATION
-    ========================================================== */
 
     function clearCheckoutErrors() {
 
@@ -1403,9 +1347,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /* =========================================================
-       ORDER PAYLOAD
-    ========================================================== */
 
     function createOrderPayload(
         orderId,
@@ -1465,9 +1406,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /* =========================================================
-       CREATE ORDER THROUGH SECURE RPC
-    ========================================================== */
 
     async function createOrderThroughRPC(
         orderPayload
@@ -1546,16 +1484,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /* =========================================================
-       DISCORD NOTIFICATION
-       
-       IMPORTANT:
-       NEVER put the Discord webhook URL here.
-
-       The browser calls the Supabase Edge Function.
-       The Edge Function reads DISCORD_WEBHOOK_URL
-       from its secure Supabase secret.
-    ========================================================== */
 
     async function sendOrderToDiscord(
         orderPayload
@@ -1693,10 +1621,6 @@ document.addEventListener('DOMContentLoaded', () => {
             );
 
 
-            /*
-             * The order has already been saved.
-             * Discord is only a notification.
-             */
 
             return {
                 success: false,
@@ -1709,10 +1633,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     }
 
-
-    /* =========================================================
-       CHECKOUT SUBMISSION
-    ========================================================== */
 
     if (checkoutConfirm) {
 
@@ -1800,9 +1720,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     );
 
 
-                    /* =========================================
-                       1. CREATE ORDER IN SUPABASE
-                    ========================================== */
 
                     const createdOrder =
                         await createOrderThroughRPC(
@@ -1816,9 +1733,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     );
 
 
-                    /* =========================================
-                       2. SEND DISCORD NOTIFICATION
-                    ========================================== */
 
                     const discordResult =
                         await sendOrderToDiscord(
@@ -1852,9 +1766,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
 
-                    /* =========================================
-                       3. SUCCESS
-                    ========================================== */
 
                     closeCheckout();
 
@@ -1986,10 +1897,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /* =========================================================
-       ENTER KEY
-    ========================================================== */
-
     [
         checkoutUsername,
         checkoutEmail
@@ -2026,9 +1933,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    /* =========================================================
-       LIVE FORM VALIDATION
-    ========================================================== */
 
     if (checkoutUsername) {
 
@@ -2070,9 +1974,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /* =========================================================
-       PRODUCT CARD GLOW
-    ========================================================== */
 
     const cards =
         document.querySelectorAll(
@@ -2197,9 +2098,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    /* =========================================================
-       SUPABASE CONNECTION TEST
-    ========================================================== */
 
     async function testSupabaseConnection() {
 
@@ -2242,9 +2140,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    /* =========================================================
-       INITIALIZE
-    ========================================================== */
 
     updateCart();
 
