@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="Premium digital gift cards with transparent pricing and responsive support."
+    />
+    <meta name="theme-color" content="#08110e" />
+    <title>GrekoLounge — Premium Digital Gift Cards</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header" id="home">
+      <div class="nav-shell">
+        <a class="brand" href="#home" aria-label="GrekoLounge home"
+          ><span class="brand-mark">G</span><span>Greko<i>Lounge</i></span></a
+        >
+        <nav aria-label="Primary">
+          <a href="#shop">Shop</a><a href="#how">How it works</a
+          ><a href="#trust">Why us</a><a href="#faq">FAQ</a
+          ><button class="nav-track" id="trackOrderBtn" type="button">
+            Track order
+          </button>
+        </nav>
+        <button class="cart-trigger" id="cartBtn" type="button">
+          <span>Cart</span><span class="cart-count" id="cartBadge">0</span>
+        </button>
+      </div>
+    </header>
+    <main id="main">
+      <section class="hero shell">
+        <div class="hero-copy reveal">
+          <p class="eyebrow"><b></b>Curated digital value</p>
+          <h1>More value.<br /><em>Less friction.</em></h1>
+          <p class="hero-lead">
+            A cleaner way to request premium digital gift cards—with upfront
+            pricing, clear order tracking, and real human support.
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="#shop"
+              >Explore cards <span>↗</span></a
+            ><a class="text-link" href="#how">See how it works →</a>
+          </div>
+          <div class="hero-proof">
+            <div><strong>15+</strong><span>card options</span></div>
+            <div><strong>3</strong><span>premium brands</span></div>
+            <div><strong>Human</strong><span>order review</span></div>
+          </div>
+        </div>
+        <div class="hero-visual reveal">
+          <div class="orb one"></div>
+          <div class="orb two"></div>
+          <article class="floating-card back one-card">
+            <div class="card-symbol">G</div>
+            <strong>Google Play</strong>
+          </article>
+          <article class="floating-card back two-card">
+            <div class="card-symbol">A</div>
+            <strong>Apple</strong>
+          </article>
+          <article class="floating-card main-card">
+            <span class="mini-label">FEATURED</span>
+            <div class="card-symbol">a</div>
+            <div><small>Amazon Gift Card</small><strong>€800</strong></div>
+            <span class="chip">POPULAR</span>
+          </article>
+          <div class="secure-pill">
+            <span>✓</span>
+            <div>
+              <strong>Order review</strong
+              ><small>Every request is verified</small>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="trust-strip">
+        <div>◆ <span>Clear pricing</span></div>
+        <div>◈ <span>Secure requests</span></div>
+        <div>✦ <span>Order references</span></div>
+        <div>◎ <span>Human support</span></div>
+      </section>
+      <section class="shop-section shell" id="shop">
+        <div class="section-heading reveal">
+          <div>
+            <p class="eyebrow"><b></b>The collection</p>
+            <h2>Choose your card</h2>
+          </div>
+          <p>
+            Browse verified listings. Final availability is confirmed during
+            order review.
+          </p>
+        </div>
+        <div class="shop-toolbar">
+          <div class="filter-group" id="brandFilters">
+            <button class="filter active" data-brand="all">All cards</button>
+          </div>
+          <label class="search-box"
+            ><span>⌕</span
+            ><input
+              id="productSearch"
+              type="search"
+              placeholder="Search cards"
+              aria-label="Search cards"
+          /></label>
+        </div>
+        <div class="product-grid" id="productGrid" aria-live="polite">
+          <div class="loading-state">Loading the collection…</div>
+        </div>
+        <p class="catalog-note">
+          Gift-card face value and purchase price are shown separately.
+          Availability is confirmed before approval.
+        </p>
+      </section>
+      <section class="how-section" id="how">
+        <div class="shell">
+          <div class="section-heading centered">
+            <div>
+              <p class="eyebrow"><b></b>Simple by design</p>
+              <h2>From selection to confirmation</h2>
+            </div>
+          </div>
+          <div class="steps">
+            <article>
+              <span>01</span>
+              <div class="step-icon">◇</div>
+              <h3>Choose your cards</h3>
+              <p>
+                Explore the collection and add the values that work for you.
+              </p>
+            </article>
+            <article>
+              <span>02</span>
+              <div class="step-icon">⌁</div>
+              <h3>Send your request</h3>
+              <p>
+                Review the exact total and provide your contact details
+                securely.
+              </p>
+            </article>
+            <article>
+              <span>03</span>
+              <div class="step-icon">✓</div>
+              <h3>Receive confirmation</h3>
+              <p>
+                Keep your unique reference while our team reviews availability.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section class="trust-section shell" id="trust">
+        <div class="trust-panel">
+          <div>
+            <p class="eyebrow light"><b></b>Built around confidence</p>
+            <h2>No mystery at checkout.</h2>
+            <p>
+              We separate face value from purchase price, show the full cart
+              before submission, and provide a reference for every successful
+              request.
+            </p>
+            <a class="button light" href="#faq">Read common questions</a>
+          </div>
+          <div class="trust-list">
+            <article>
+              <span>01</span>
+              <div>
+                <h3>Server-verified totals</h3>
+                <p>
+                  Prices are validated against the live catalog—not trusted from
+                  the browser.
+                </p>
+              </div>
+            </article>
+            <article>
+              <span>02</span>
+              <div>
+                <h3>Minimal personal data</h3>
+                <p>
+                  We only request details needed to contact you about your
+                  order.
+                </p>
+              </div>
+            </article>
+            <article>
+              <span>03</span>
+              <div>
+                <h3>Transparent status</h3>
+                <p>
+                  A request is pending until reviewed; it is never presented as
+                  instantly fulfilled.
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+      <section class="faq-section shell" id="faq">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow"><b></b>Need to know</p>
+            <h2>Frequently asked</h2>
+          </div>
+        </div>
+        <div class="faq-grid">
+          <details>
+            <summary>Is my order confirmed immediately?<span>+</span></summary>
+            <p>
+              No. Submission creates a pending request. Our team confirms
+              availability and next steps.
+            </p>
+          </details>
+          <details>
+            <summary>
+              Why is face value different from price?<span>+</span>
+            </summary>
+            <p>
+              Face value is the card amount; purchase price is what the listing
+              costs. Both are shown clearly.
+            </p>
+          </details>
+          <details>
+            <summary>What is the minimum request?<span>+</span></summary>
+            <p>
+              The current minimum is €100. Your cart shows progress toward it.
+            </p>
+          </details>
+          <details>
+            <summary>What should I keep after ordering?<span>+</span></summary>
+            <p>
+              Save the unique order reference shown after submission so support
+              can locate it.
+            </p>
+          </details>
+        </div>
+        <div class="tracking-cta">
+          <div>
+            <p class="eyebrow light"><b></b>Already submitted?</p>
+            <h3>Follow your request from review to completion.</h3>
+            <p>
+              Use your private order reference and email to see the latest
+              verified status.
+            </p>
+          </div>
+          <button class="button light" id="trackOrderCta" type="button">
+            Track my order →
+          </button>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <div class="footer-main shell">
+        <div>
+          <a class="brand" href="#home"
+            ><span class="brand-mark">G</span><span>Greko<i>Lounge</i></span></a
+          >
+          <p>Premium digital gift-card requests, presented with clarity.</p>
+        </div>
+        <div>
+          <strong>Explore</strong><a href="#shop">Shop</a
+          ><a href="#how">How it works</a><a href="#faq">FAQ</a>
+        </div>
+        <div>
+          <strong>Legal</strong><button data-legal="terms">Terms</button
+          ><button data-legal="privacy">Privacy</button
+          ><button data-legal="refunds">Refund policy</button>
+        </div>
+        <div>
+          <strong>Support</strong
+          ><a href="mailto:grekofinal@gmail.com">grekofinal@gmail.com</a
+          ><span>Include your order reference.</span>
+        </div>
+      </div>
+      <div class="footer-bottom shell">
+        <span>© <span id="year"></span> GrekoLounge</span
+        ><span>Digital products · Responsible purchasing</span>
+      </div>
+    </footer>
+    <div class="overlay" id="cartOverlay" hidden>
+      <section
+        class="drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cartTitle"
+      >
+        <header>
+          <div>
+            <p class="eyebrow"><b></b>Your selection</p>
+            <h2 id="cartTitle">Shopping cart</h2>
+          </div>
+          <button class="icon-button" data-close="cart" aria-label="Close cart">
+            ×
+          </button>
+        </header>
+        <div class="minimum-card">
+          <div><span>Minimum request</span><strong>€100</strong></div>
+          <div class="progress"><span id="minimumProgress"></span></div>
+          <p id="minimumOrderMessage">Add products to begin.</p>
+        </div>
+        <div class="drawer-items" id="cartItems"></div>
+        <div class="drawer-footer">
+          <div><span>Subtotal</span><strong id="cartTotal">€0</strong></div>
+          <button class="button primary full" id="checkoutBtn" disabled>
+            Continue to request
+          </button>
+        </div>
+      </section>
+    </div>
+    <div class="overlay" id="checkoutOverlay" hidden>
+      <section
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="checkoutTitle"
+      >
+        <header>
+          <div>
+            <p class="eyebrow"><b></b>Order request</p>
+            <h2 id="checkoutTitle">Review and submit</h2>
+          </div>
+          <button
+            class="icon-button"
+            data-close="checkout"
+            aria-label="Close checkout"
+          >
+            ×
+          </button>
+        </header>
+        <div class="checkout-summary" id="checkoutSummary"></div>
+        <form id="checkoutForm" novalidate>
+          <label
+            >Username or preferred name<input
+              id="checkoutUsername"
+              autocomplete="name"
+              maxlength="80"
+              required /><small id="usernameError"></small></label
+          ><label
+            >Email address<input
+              id="checkoutEmail"
+              type="email"
+              autocomplete="email"
+              maxlength="254"
+              required /><small id="emailError"></small></label
+          ><label class="consent"
+            ><input id="checkoutConsent" type="checkbox" required /><span
+              >I agree to the
+              <button type="button" data-legal="terms">order terms</button> and
+              understand this is pending.</span
+            ></label
+          >
+          <p class="form-error" id="checkoutError" role="alert"></p>
+          <div class="form-actions">
+            <button type="button" class="button ghost" data-close="checkout">
+              Back</button
+            ><button type="submit" class="button primary" id="checkoutConfirm">
+              Submit request
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+    <div class="overlay" id="successOverlay" hidden>
+      <section
+        class="modal success-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="successTitle"
+      >
+        <div class="success-icon">✓</div>
+        <p class="eyebrow"><b></b>Request received</p>
+        <h2 id="successTitle">You’re on the list.</h2>
+        <p>Your request is pending review. Save this reference:</p>
+        <button
+          class="order-reference"
+          id="successOrderReference"
+          title="Copy reference"
+        ></button>
+        <p id="successOrderTotal"></p>
+        <button class="button primary" data-close="success">
+          Continue browsing
+        </button>
+      </section>
+    </div>
+    <div class="overlay" id="trackOverlay" hidden>
+      <section
+        class="modal track-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="trackTitle"
+      >
+        <header>
+          <div>
+            <p class="eyebrow"><b></b>Private lookup</p>
+            <h2 id="trackTitle">Track your order</h2>
+          </div>
+          <button
+            class="icon-button"
+            data-close="track"
+            aria-label="Close tracking"
+          >
+            ×
+          </button>
+        </header>
+        <form id="trackForm">
+          <label
+            >Order reference<input
+              id="trackReference"
+              placeholder="GL-20260816-XXXXXXXX"
+              autocomplete="off"
+              required /></label
+          ><label
+            >Email used for the order<input
+              id="trackEmail"
+              type="email"
+              autocomplete="email"
+              required
+          /></label>
+          <p class="form-error" id="trackError" role="alert"></p>
+          <button class="button primary full" id="trackSubmit" type="submit">
+            Find my order
+          </button>
+        </form>
+        <div class="tracking-result" id="trackingResult" hidden></div>
+      </section>
+    </div>
+    <div class="overlay" id="legalOverlay" hidden>
+      <section
+        class="modal legal-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="legalTitle"
+      >
+        <header>
+          <h2 id="legalTitle">Policy</h2>
+          <button
+            class="icon-button"
+            data-close="legal"
+            aria-label="Close policy"
+          >
+            ×
+          </button>
+        </header>
+        <div id="legalContent"></div>
+      </section>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+  </body>
+</html>

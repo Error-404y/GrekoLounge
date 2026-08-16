@@ -1,0 +1,2784 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>GrekoLounge | Admin</title>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #080808;
+            --panel: #111111;
+            --panel-2: #161616;
+            --border: rgba(255,255,255,.08);
+            --text: #f5f5f5;
+            --muted: #8f8f8f;
+            --gold: #d4af37;
+            --gold-light: #f1d675;
+            --danger: #ef5350;
+            --success: #4caf50;
+            --warning: #ffb74d;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(
+                    circle at top right,
+                    rgba(212,175,55,.08),
+                    transparent 35%
+                ),
+                var(--bg);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 430px;
+            padding: 40px;
+            background: rgba(17,17,17,.95);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: 0 30px 80px rgba(0,0,0,.45);
+        }
+
+        .login-logo {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .login-logo span {
+            color: var(--gold);
+        }
+
+        .login-eyebrow {
+            display: block;
+            color: var(--gold);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .18em;
+            margin-bottom: 10px;
+        }
+
+        .login-card h1 {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+
+        .login-description {
+            color: var(--muted);
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        .field {
+            margin-bottom: 18px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ddd;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .field input,
+        .toolbar input,
+        .toolbar select {
+            width: 100%;
+            border: 1px solid var(--border);
+            outline: none;
+            background: #0d0d0d;
+            color: var(--text);
+            border-radius: 12px;
+            padding: 13px 14px;
+            transition: .2s ease;
+        }
+
+        .field input:focus,
+        .toolbar input:focus,
+        .toolbar select:focus {
+            border-color: rgba(212,175,55,.65);
+            box-shadow: 0 0 0 3px rgba(212,175,55,.08);
+        }
+
+        .primary-btn {
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(
+                135deg,
+                var(--gold-light),
+                var(--gold)
+            );
+            color: #111;
+            font-weight: 800;
+            padding: 13px 18px;
+            transition: .2s ease;
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.05);
+        }
+
+        .primary-btn:disabled {
+            opacity: .5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-error {
+            min-height: 20px;
+            margin-top: 14px;
+            color: #ff7b78;
+            font-size: 13px;
+        }
+
+        .admin-app {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .admin-app.visible {
+            display: block;
+        }
+
+        .admin-header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            border-bottom: 1px solid var(--border);
+            background: rgba(8,8,8,.92);
+            backdrop-filter: blur(18px);
+        }
+
+        .admin-header-inner {
+            max-width: 1500px;
+            margin: auto;
+            min-height: 76px;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .admin-brand {
+            font-size: 23px;
+            font-weight: 800;
+        }
+
+        .admin-brand span {
+            color: var(--gold);
+        }
+
+        .admin-label {
+            color: var(--muted);
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .ghost-btn,
+        .danger-btn {
+            border: 1px solid var(--border);
+            background: #111;
+            color: var(--text);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-weight: 600;
+        }
+
+        .ghost-btn:hover {
+            border-color: rgba(212,175,55,.4);
+        }
+
+        .danger-btn {
+            color: #ff8985;
+        }
+
+        .danger-btn:hover {
+            border-color: rgba(239,83,80,.5);
+        }
+
+        .admin-main {
+            max-width: 1500px;
+            margin: auto;
+            padding: 35px 24px 60px;
+        }
+
+        .page-heading {
+            margin-bottom: 28px;
+        }
+
+        .eyebrow {
+            display: block;
+            color: var(--gold);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .18em;
+            margin-bottom: 8px;
+        }
+
+        .page-heading h1 {
+            font-size: clamp(30px, 5vw, 44px);
+            margin-bottom: 8px;
+        }
+
+        .page-heading p {
+            color: var(--muted);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns:
+                repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .stat-card {
+            padding: 22px;
+            background: linear-gradient(
+                145deg,
+                #151515,
+                #0e0e0e
+            );
+            border: 1px solid var(--border);
+            border-radius: 18px;
+        }
+
+        .stat-card span {
+            display: block;
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card strong {
+            display: block;
+            font-size: 29px;
+        }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns:
+                minmax(220px, 1fr)
+                180px
+                auto
+                auto;
+            gap: 12px;
+            padding: 16px;
+            margin-bottom: 18px;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: var(--panel);
+        }
+
+        .orders-panel {
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            background: var(--panel);
+        }
+
+        .orders-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .orders-header h2 {
+            font-size: 18px;
+        }
+
+        .orders-count {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        th {
+            color: #999;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            background: #0d0d0d;
+        }
+
+        td {
+            color: #ddd;
+            font-size: 14px;
+        }
+
+        tbody tr {
+            transition: background .2s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(255,255,255,.025);
+        }
+
+        .order-id {
+            color: var(--gold-light);
+            font-weight: 700;
+        }
+
+        .customer-name {
+            font-weight: 600;
+        }
+
+        .customer-email {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 3px;
+        }
+
+        .order-total {
+            font-weight: 800;
+        }
+
+        .status-select {
+            min-width: 140px;
+            border: 1px solid var(--border);
+            background: #0d0d0d;
+            color: var(--text);
+            border-radius: 9px;
+            padding: 8px 10px;
+            outline: none;
+        }
+
+        .status-select.pending {
+            border-color: rgba(255,183,77,.35);
+            color: var(--warning);
+        }
+
+        .status-select.approved,
+        .status-select.completed {
+            border-color: rgba(76,175,80,.35);
+            color: #76d579;
+        }
+
+        .status-select.rejected,
+        .status-select.cancelled {
+            border-color: rgba(239,83,80,.35);
+            color: #ff7773;
+        }
+
+        .status-select.processing {
+            border-color: rgba(100,181,246,.35);
+            color: #74bdf5;
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .small-btn {
+            border: 1px solid var(--border);
+            background: #151515;
+            color: #ddd;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .small-btn:hover {
+            border-color: rgba(212,175,55,.4);
+        }
+
+        .small-btn.delete:hover {
+            color: #ff7773;
+            border-color: rgba(239,83,80,.4);
+        }
+
+        .table-message {
+            padding: 60px 20px;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid rgba(255,255,255,.15);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0,0,0,.75);
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .detail-modal {
+            width: 100%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: #111;
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            box-shadow: 0 30px 100px rgba(0,0,0,.65);
+        }
+
+        .detail-header {
+            padding: 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .detail-header h3 {
+            font-size: 22px;
+        }
+
+        .close-detail {
+            width: 38px;
+            height: 38px;
+            border: 1px solid var(--border);
+            background: #171717;
+            color: white;
+            border-radius: 10px;
+            font-size: 24px;
+        }
+
+        .detail-body {
+            padding: 22px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 22px;
+        }
+
+        .detail-box {
+            padding: 15px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #0d0d0d;
+        }
+
+        .detail-box span {
+            display: block;
+            color: var(--muted);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-bottom: 6px;
+        }
+
+        .detail-box strong {
+            word-break: break-word;
+        }
+
+        .detail-items {
+            border-top: 1px solid var(--border);
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .detail-item small {
+            display: block;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .admin-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .admin-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 10px rgba(76,175,80,.5);
+        }
+
+        @media (max-width: 1000px) {
+
+            .stats-grid {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+
+            .toolbar {
+                grid-template-columns:
+                    1fr 1fr;
+            }
+
+        }
+
+        @media (max-width: 650px) {
+
+            .admin-header-inner {
+                padding: 0 15px;
+            }
+
+            .admin-label {
+                display: none;
+            }
+
+            .admin-main {
+                padding: 25px 15px 50px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .toolbar {
+                grid-template-columns: 1fr;
+            }
+
+            .login-card {
+                padding: 28px 22px;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-user {
+                display: none;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- LOGIN -->
+
+    <section
+        class="login-screen"
+        id="loginScreen"
+    >
+
+        <div class="login-card">
+
+            <div class="login-logo">
+                Greko<span>Lounge</span>
+            </div>
+
+            <span class="login-eyebrow">
+                ADMIN PANEL
+            </span>
+
+            <h1>
+                Welcome Back
+            </h1>
+
+            <p class="login-description">
+                Sign in with your authorized
+                GrekoLounge administrator account.
+            </p>
+
+            <form id="loginForm">
+
+                <div class="field">
+
+                    <label for="adminEmail">
+                        Email
+                    </label>
+
+                    <input
+                        type="email"
+                        id="adminEmail"
+                        placeholder="admin@example.com"
+                        autocomplete="email"
+                        required
+                    >
+
+                </div>
+
+                <div class="field">
+
+                    <label for="adminPassword">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="adminPassword"
+                        placeholder="Your password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="primary-btn"
+                    id="loginButton"
+                    style="width:100%;"
+                >
+                    Sign In
+                </button>
+
+                <div
+                    class="login-error"
+                    id="loginError"
+                ></div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- ADMIN APP -->
+
+    <div
+        class="admin-app"
+        id="adminApp"
+    >
+
+        <header class="admin-header">
+
+            <div class="admin-header-inner">
+
+                <div>
+
+                    <span class="admin-brand">
+                        Greko<span>Lounge</span>
+                    </span>
+
+                    <span class="admin-label">
+                        ADMIN DASHBOARD
+                    </span>
+
+                </div>
+
+                <div class="header-actions">
+
+                    <a
+                        class="ghost-btn"
+                        href="catalog.html"
+                        style="text-decoration:none"
+                    >
+                        Catalog
+                    </a>
+
+                    <div class="admin-user">
+
+                        <span class="admin-dot"></span>
+
+                        <span id="loggedInEmail">
+                            Administrator
+                        </span>
+
+                    </div>
+
+                    <button
+                        class="ghost-btn"
+                        id="refreshButton"
+                    >
+                        Refresh
+                    </button>
+
+                    <button
+                        class="danger-btn"
+                        id="logoutButton"
+                    >
+                        Logout
+                    </button>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <main class="admin-main">
+
+            <div class="page-heading">
+
+                <span class="eyebrow">
+                    ORDER MANAGEMENT
+                </span>
+
+                <h1>
+                    Dashboard
+                </h1>
+
+                <p>
+                    Manage incoming GrekoLounge orders.
+                </p>
+
+            </div>
+
+
+            <!-- STATS -->
+
+            <section class="stats-grid">
+
+                <div class="stat-card">
+
+                    <span>
+                        Total Orders
+                    </span>
+
+                    <strong id="statTotalOrders">
+                        0
+                    </strong>
+
+                </div>
+
+                <div class="stat-card">
+
+                    <span>
+                        Pending
+                    </span>
+
+                    <strong id="statPending">
+                        0
+                    </strong>
+
+                </div>
+
+                <div class="stat-card">
+
+                    <span>
+                        Approved / Processing
+                    </span>
+
+                    <strong id="statProcessing">
+                        0
+                    </strong>
+
+                </div>
+
+                <div class="stat-card">
+
+                    <span>
+                        Order Value
+                    </span>
+
+                    <strong>
+                        <span id="statRevenue">
+                            0
+                        </span>
+                        €
+                    </strong>
+
+                </div>
+
+            </section>
+
+
+            <!-- TOOLBAR -->
+
+            <section class="toolbar">
+
+                <input
+                    type="search"
+                    id="searchInput"
+                    placeholder="Search order ID, username or email..."
+                >
+
+                <select id="statusFilter">
+
+                    <option value="all">
+                        All statuses
+                    </option>
+
+                    <option value="pending">
+                        Pending
+                    </option>
+
+                    <option value="processing">
+                        Processing
+                    </option>
+
+                    <option value="approved">
+                        Approved
+                    </option>
+
+                    <option value="completed">
+                        Completed
+                    </option>
+
+                    <option value="rejected">
+                        Rejected
+                    </option>
+
+                    <option value="cancelled">
+                        Cancelled
+                    </option>
+
+                </select>
+
+                <button
+                    class="ghost-btn"
+                    id="clearFiltersButton"
+                >
+                    Clear Filters
+                </button>
+
+                <button
+                    class="primary-btn"
+                    id="manualRefreshButton"
+                >
+                    Reload Orders
+                </button>
+
+            </section>
+
+
+            <!-- ORDERS -->
+
+            <section class="orders-panel">
+
+                <div class="orders-header">
+
+                    <h2>
+                        Orders
+                    </h2>
+
+                    <span
+                        class="orders-count"
+                        id="ordersCount"
+                    >
+                        0 orders
+                    </span>
+
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Order</th>
+                                <th>Customer</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="ordersTableBody">
+
+                            <tr>
+
+                                <td
+                                    colspan="7"
+                                    class="table-message"
+                                >
+
+                                    <div class="spinner"></div>
+
+                                    Loading orders...
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <!-- DETAIL MODAL -->
+
+    <div
+        class="modal-overlay"
+        id="detailOverlay"
+    >
+
+        <div class="detail-modal">
+
+            <div class="detail-header">
+
+                <div>
+
+                    <span class="eyebrow">
+                        ORDER DETAILS
+                    </span>
+
+                    <h3 id="detailOrderId">
+                        —
+                    </h3>
+
+                </div>
+
+                <button
+                    class="close-detail"
+                    id="closeDetail"
+                    aria-label="Close"
+                >
+                    &times;
+                </button>
+
+            </div>
+
+            <div class="detail-body">
+
+                <div class="detail-grid">
+
+                    <div class="detail-box">
+
+                        <span>Username</span>
+
+                        <strong id="detailUsername">
+                            —
+                        </strong>
+
+                    </div>
+
+                    <div class="detail-box">
+
+                        <span>Email</span>
+
+                        <strong id="detailEmail">
+                            —
+                        </strong>
+
+                    </div>
+
+                    <div class="detail-box">
+
+                        <span>Status</span>
+
+                        <strong id="detailStatus">
+                            —
+                        </strong>
+
+                    </div>
+
+                    <div class="detail-box">
+
+                        <span>Total</span>
+
+                        <strong>
+                            <span id="detailTotal">
+                                0
+                            </span>
+                            €
+                        </strong>
+
+                    </div>
+
+                    <div class="detail-box">
+
+                        <span>Created</span>
+
+                        <strong id="detailCreated">
+                            —
+                        </strong>
+
+                    </div>
+
+                    <div class="detail-box">
+
+                        <span>Database ID</span>
+
+                        <strong id="detailDatabaseId">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+                <span class="eyebrow">
+                    ORDER ITEMS
+                </span>
+
+                <div
+                    class="detail-items"
+                    id="detailItems"
+                ></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- SUPABASE -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+
+                /* =====================================================
+           SUPABASE CONFIG
+        ====================================================== */
+
+        const SUPABASE_URL =
+            'https://vsjrqeaubmoxjzlklzbg.supabase.co';
+
+        const SUPABASE_PUBLISHABLE_KEY =
+            'sb_publishable_jaQjrYZSve2__Pw5594YEg_R_ou42Sm';
+
+
+        // Admin authorization is resolved by protected database roles.
+
+
+        /* =====================================================
+           SUPABASE CLIENT
+        ====================================================== */
+
+        const supabaseClient =
+            window.supabase.createClient(
+                SUPABASE_URL,
+                SUPABASE_PUBLISHABLE_KEY
+            );
+
+
+        /* =====================================================
+           STATE
+        ====================================================== */
+
+        let orders = [];
+
+        let filteredOrders = [];
+
+
+        /* =====================================================
+           ELEMENTS
+        ====================================================== */
+
+        const loginScreen =
+            document.getElementById('loginScreen');
+
+        const adminApp =
+            document.getElementById('adminApp');
+
+        const loginForm =
+            document.getElementById('loginForm');
+
+        const adminEmail =
+            document.getElementById('adminEmail');
+
+        const adminPassword =
+            document.getElementById('adminPassword');
+
+        const loginButton =
+            document.getElementById('loginButton');
+
+        const loginError =
+            document.getElementById('loginError');
+
+        const logoutButton =
+            document.getElementById('logoutButton');
+
+        const refreshButton =
+            document.getElementById('refreshButton');
+
+        const manualRefreshButton =
+            document.getElementById('manualRefreshButton');
+
+        const searchInput =
+            document.getElementById('searchInput');
+
+        const statusFilter =
+            document.getElementById('statusFilter');
+
+        const clearFiltersButton =
+            document.getElementById('clearFiltersButton');
+
+        const ordersTableBody =
+            document.getElementById('ordersTableBody');
+
+        const ordersCount =
+            document.getElementById('ordersCount');
+
+        const statTotalOrders =
+            document.getElementById('statTotalOrders');
+
+        const statPending =
+            document.getElementById('statPending');
+
+        const statProcessing =
+            document.getElementById('statProcessing');
+
+        const statRevenue =
+            document.getElementById('statRevenue');
+
+        const detailOverlay =
+            document.getElementById('detailOverlay');
+
+        const closeDetail =
+            document.getElementById('closeDetail');
+
+        const detailOrderId =
+            document.getElementById('detailOrderId');
+
+        const detailUsername =
+            document.getElementById('detailUsername');
+
+        const detailEmail =
+            document.getElementById('detailEmail');
+
+        const detailStatus =
+            document.getElementById('detailStatus');
+
+        const detailTotal =
+            document.getElementById('detailTotal');
+
+        const detailCreated =
+            document.getElementById('detailCreated');
+
+        const detailDatabaseId =
+            document.getElementById('detailDatabaseId');
+
+        const detailItems =
+            document.getElementById('detailItems');
+
+        const loggedInEmail =
+            document.getElementById('loggedInEmail');
+
+
+        /* =====================================================
+           HELPERS
+        ====================================================== */
+
+        function escapeHtml(value) {
+
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+
+        }
+
+
+        function formatEuro(value) {
+
+            return (
+                Number(value) || 0
+            ).toLocaleString(
+                'en-GB',
+                {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2
+                }
+            );
+
+        }
+
+
+        function formatDate(value) {
+
+            if (!value) {
+                return '—';
+            }
+
+            const date =
+                new Date(value);
+
+            if (
+                Number.isNaN(
+                    date.getTime()
+                )
+            ) {
+                return '—';
+            }
+
+            return date.toLocaleString(
+                'en-GB',
+                {
+                    dateStyle: 'medium',
+                    timeStyle: 'short'
+                }
+            );
+
+        }
+
+
+        function normalizeItems(items) {
+
+            if (Array.isArray(items)) {
+                return items;
+            }
+
+            if (typeof items === 'string') {
+
+                try {
+
+                    const parsed =
+                        JSON.parse(items);
+
+                    return Array.isArray(parsed)
+                        ? parsed
+                        : [];
+
+                } catch {
+
+                    return [];
+
+                }
+
+            }
+
+            return [];
+
+        }
+
+
+        /* =====================================================
+           ADMIN CHECK
+        ====================================================== */
+
+        async function getCurrentSession() {
+
+            const {
+                data,
+                error
+            } =
+                await supabaseClient
+                    .auth
+                    .getSession();
+
+            if (error) {
+                throw error;
+            }
+
+            return data?.session || null;
+
+        }
+
+
+        async function isAdminUser() {
+
+            const session =
+                await getCurrentSession();
+
+            if (!session?.user) {
+                return false;
+            }
+
+            const { data, error } =
+                await supabaseClient.rpc(
+                    'is_admin'
+                );
+
+            return !error && data === true;
+
+        }
+
+
+        /* =====================================================
+           AUTH UI
+        ====================================================== */
+
+        function showAdmin(session) {
+
+            loginScreen.style.display =
+                'none';
+
+            adminApp.classList.add(
+                'visible'
+            );
+
+            document.body.style.overflow =
+                '';
+
+            if (
+                session?.user?.email
+            ) {
+
+                loggedInEmail.textContent =
+                    session.user.email;
+
+            } else {
+
+                loggedInEmail.textContent =
+                    'Administrator';
+
+            }
+
+        }
+
+
+        function showLogin() {
+
+            adminApp.classList.remove(
+                'visible'
+            );
+
+            loginScreen.style.display =
+                'flex';
+
+            adminEmail.value =
+                '';
+
+            adminPassword.value =
+                '';
+
+            loginError.textContent =
+                '';
+
+            loggedInEmail.textContent =
+                'Administrator';
+
+        }
+
+
+        function denyAccess() {
+
+            loginError.textContent =
+                'Access denied. This account is not authorized as an administrator.';
+
+        }
+
+
+        /* =====================================================
+           INITIAL SESSION CHECK
+        ====================================================== */
+
+        async function checkSession() {
+
+            try {
+
+                const session =
+                    await getCurrentSession();
+
+                if (!session) {
+
+                    showLogin();
+
+                    return;
+
+                }
+
+
+                const allowed =
+                    await isAdminUser();
+
+                if (!allowed) {
+
+                    await supabaseClient
+                        .auth
+                        .signOut();
+
+                    showLogin();
+
+                    denyAccess();
+
+                    return;
+
+                }
+
+
+                showAdmin(session);
+
+                await loadOrders();
+
+            } catch (error) {
+
+                console.error(
+                    'Session check failed:',
+                    error
+                );
+
+                showLogin();
+
+            }
+
+        }
+
+
+        /* =====================================================
+           LOGIN
+        ====================================================== */
+
+        loginForm.addEventListener(
+            'submit',
+            async event => {
+
+                event.preventDefault();
+
+                loginError.textContent =
+                    '';
+
+                const email =
+                    adminEmail.value.trim();
+
+                const password =
+                    adminPassword.value;
+
+
+                if (
+                    !email ||
+                    !password
+                ) {
+
+                    loginError.textContent =
+                        'Please enter your email and password.';
+
+                    return;
+
+                }
+
+
+                loginButton.disabled =
+                    true;
+
+                loginButton.textContent =
+                    'Signing in...';
+
+
+                try {
+
+                    const {
+                        data,
+                        error
+                    } =
+                        await supabaseClient
+                            .auth
+                            .signInWithPassword({
+
+                                email:
+                                    email,
+
+                                password:
+                                    password
+
+                            });
+
+
+                    if (error) {
+                        throw error;
+                    }
+
+
+                    const session =
+                        data?.session;
+
+
+                    if (!session?.user) {
+
+                        throw new Error(
+                            'Login succeeded, but no user session was returned.'
+                        );
+
+                    }
+
+
+                    if (!(await isAdminUser())) {
+
+                        await supabaseClient
+                            .auth
+                            .signOut();
+
+                        throw new Error(
+                            'Access denied. This account is not the authorized admin account.'
+                        );
+
+                    }
+
+
+                    showAdmin(session);
+
+                    await loadOrders();
+
+
+                } catch (error) {
+
+                    console.error(
+                        'Login failed:',
+                        error
+                    );
+
+                    loginError.textContent =
+                        error.message ||
+                        'Login failed. Please check your credentials.';
+
+                } finally {
+
+                    loginButton.disabled =
+                        false;
+
+                    loginButton.textContent =
+                        'Sign In';
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           LOGOUT
+        ====================================================== */
+
+        logoutButton.addEventListener(
+            'click',
+            async () => {
+
+                await supabaseClient
+                    .auth
+                    .signOut();
+
+                orders = [];
+
+                filteredOrders = [];
+
+                showLogin();
+
+            }
+        );
+
+
+        /* =====================================================
+           LOAD ORDERS
+        ====================================================== */
+
+        async function loadOrders() {
+
+            ordersTableBody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="7"
+                        class="table-message"
+                    >
+
+                        <div class="spinner"></div>
+
+                        Loading orders...
+
+                    </td>
+
+                </tr>
+
+            `;
+
+
+            try {
+
+                /*
+                 * Noch einmal sicherstellen,
+                 * dass wirklich der Admin eingeloggt ist.
+                 */
+
+                const allowed =
+                    await isAdminUser();
+
+                if (!allowed) {
+
+                    await supabaseClient
+                        .auth
+                        .signOut();
+
+                    showLogin();
+
+                    denyAccess();
+
+                    return;
+
+                }
+
+
+                const {
+                    data,
+                    error
+                } =
+                    await supabaseClient
+                        .from('orders')
+                        .select('*')
+                        .order(
+                            'created_at',
+                            {
+                                ascending: false
+                            }
+                        );
+
+
+                if (error) {
+                    throw error;
+                }
+
+
+                orders =
+                    Array.isArray(data)
+                        ? data
+                        : [];
+
+
+                updateStatistics();
+
+                applyFilters();
+
+
+            } catch (error) {
+
+                console.error(
+                    'Could not load orders:',
+                    error
+                );
+
+
+                ordersTableBody.innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="table-message"
+                        >
+
+                            Could not load orders.
+
+                            <br><br>
+
+                            ${escapeHtml(
+                                error.message ||
+                                'Unknown error'
+                            )}
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+
+        }
+
+
+        /* =====================================================
+           FILTERS
+        ====================================================== */
+
+        function applyFilters() {
+
+            const search =
+                searchInput.value
+                    .trim()
+                    .toLowerCase();
+
+            const status =
+                statusFilter.value;
+
+
+            filteredOrders =
+                orders.filter(order => {
+
+                    const matchesSearch =
+                        !search ||
+                        String(
+                            order.order_id || ''
+                        )
+                            .toLowerCase()
+                            .includes(search) ||
+                        String(
+                            order.username || ''
+                        )
+                            .toLowerCase()
+                            .includes(search) ||
+                        String(
+                            order.email || ''
+                        )
+                            .toLowerCase()
+                            .includes(search);
+
+
+                    const orderStatus =
+                        String(
+                            order.status ||
+                            'pending'
+                        )
+                            .toLowerCase();
+
+
+                    const matchesStatus =
+                        status === 'all' ||
+                        orderStatus === status;
+
+
+                    return (
+                        matchesSearch &&
+                        matchesStatus
+                    );
+
+                });
+
+
+            renderOrders();
+
+        }
+
+
+        searchInput.addEventListener(
+            'input',
+            applyFilters
+        );
+
+
+        statusFilter.addEventListener(
+            'change',
+            applyFilters
+        );
+
+
+        clearFiltersButton.addEventListener(
+            'click',
+            () => {
+
+                searchInput.value =
+                    '';
+
+                statusFilter.value =
+                    'all';
+
+                applyFilters();
+
+            }
+        );
+
+
+        /* =====================================================
+           RENDER ORDERS
+        ====================================================== */
+
+        function renderOrders() {
+
+            ordersCount.textContent =
+                `${filteredOrders.length} ${
+                    filteredOrders.length === 1
+                        ? 'order'
+                        : 'orders'
+                }`;
+
+
+            if (
+                filteredOrders.length === 0
+            ) {
+
+                ordersTableBody.innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="table-message"
+                        >
+                            No orders found.
+                        </td>
+
+                    </tr>
+
+                `;
+
+                return;
+
+            }
+
+
+            ordersTableBody.innerHTML =
+                '';
+
+
+            filteredOrders.forEach(
+                order => {
+
+                    const row =
+                        document.createElement(
+                            'tr'
+                        );
+
+
+                    const items =
+                        normalizeItems(
+                            order.items
+                        );
+
+
+                    const itemCount =
+                        items.reduce(
+                            (
+                                sum,
+                                item
+                            ) => {
+
+                                return sum +
+                                    (
+                                        Number(
+                                            item.quantity
+                                        ) || 0
+                                    );
+
+                            },
+                            0
+                        );
+
+
+                    const status =
+                        String(
+                            order.status ||
+                            'pending'
+                        ).toLowerCase();
+
+
+                    row.innerHTML = `
+
+                        <td>
+
+                            <div class="order-id">
+
+                                ${escapeHtml(
+                                    order.order_id ||
+                                    '—'
+                                )}
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="customer-name">
+
+                                ${escapeHtml(
+                                    order.username ||
+                                    '—'
+                                )}
+
+                            </div>
+
+                            <div class="customer-email">
+
+                                ${escapeHtml(
+                                    order.email ||
+                                    '—'
+                                )}
+
+                            </div>
+
+                        </td>
+
+
+                        <td>
+                            ${itemCount}
+                        </td>
+
+
+                        <td>
+
+                            <span class="order-total">
+
+                                ${formatEuro(
+                                    order.total
+                                )} €
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <select
+                                class="status-select ${escapeHtml(status)}"
+                                data-id="${escapeHtml(
+                                    order.id
+                                )}"
+                            >
+
+                                <option
+                                    value="pending"
+                                    ${status === 'pending' ? 'selected' : ''}
+                                >
+                                    Pending
+                                </option>
+
+                                <option
+                                    value="processing"
+                                    ${status === 'processing' ? 'selected' : ''}
+                                >
+                                    Processing
+                                </option>
+
+                                <option
+                                    value="approved"
+                                    ${status === 'approved' ? 'selected' : ''}
+                                >
+                                    Approved
+                                </option>
+
+                                <option
+                                    value="completed"
+                                    ${status === 'completed' ? 'selected' : ''}
+                                >
+                                    Completed
+                                </option>
+
+                                <option
+                                    value="rejected"
+                                    ${status === 'rejected' ? 'selected' : ''}
+                                >
+                                    Rejected
+                                </option>
+
+                                <option
+                                    value="cancelled"
+                                    ${status === 'cancelled' ? 'selected' : ''}
+                                >
+                                    Cancelled
+                                </option>
+
+                            </select>
+
+                        </td>
+
+
+                        <td>
+
+                            ${formatDate(
+                                order.created_at
+                            )}
+
+                        </td>
+
+
+                        <td>
+
+                            <div class="row-actions">
+
+                                <button
+                                    class="small-btn"
+                                    data-action="view"
+                                    data-id="${escapeHtml(
+                                        order.id
+                                    )}"
+                                >
+                                    View
+                                </button>
+
+                                <button
+                                    class="small-btn delete"
+                                    data-action="delete"
+                                    data-id="${escapeHtml(
+                                        order.id
+                                    )}"
+                                >
+                                    Delete
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    `;
+
+
+                    ordersTableBody.appendChild(
+                        row
+                    );
+
+                }
+            );
+
+        }
+
+
+        /* =====================================================
+           STATISTICS
+        ====================================================== */
+
+        function updateStatistics() {
+
+            const totalOrders =
+                orders.length;
+
+
+            const pending =
+                orders.filter(
+                    order =>
+                        String(
+                            order.status ||
+                            'pending'
+                        ).toLowerCase() ===
+                        'pending'
+                ).length;
+
+
+            const processing =
+                orders.filter(
+                    order => {
+
+                        const status =
+                            String(
+                                order.status ||
+                                ''
+                            ).toLowerCase();
+
+                        return (
+                            status ===
+                            'processing' ||
+                            status ===
+                            'approved'
+                        );
+
+                    }
+                ).length;
+
+
+            const revenue =
+                orders.reduce(
+                    (
+                        sum,
+                        order
+                    ) => {
+
+                        return sum +
+                            (
+                                Number(
+                                    order.total
+                                ) || 0
+                            );
+
+                    },
+                    0
+                );
+
+
+            statTotalOrders.textContent =
+                totalOrders;
+
+            statPending.textContent =
+                pending;
+
+            statProcessing.textContent =
+                processing;
+
+            statRevenue.textContent =
+                formatEuro(revenue);
+
+        }
+
+
+        /* =====================================================
+           UPDATE STATUS
+        ====================================================== */
+
+        ordersTableBody.addEventListener(
+            'change',
+            async event => {
+
+                const select =
+                    event.target.closest(
+                        '.status-select'
+                    );
+
+
+                if (!select) {
+                    return;
+                }
+
+
+                const allowed =
+                    await isAdminUser();
+
+                if (!allowed) {
+
+                    await supabaseClient
+                        .auth
+                        .signOut();
+
+                    showLogin();
+
+                    denyAccess();
+
+                    return;
+
+                }
+
+
+                const id =
+                    select.getAttribute(
+                        'data-id'
+                    );
+
+                const status =
+                    select.value;
+
+
+                const previousOrder =
+                    orders.find(
+                        item =>
+                            String(item.id) ===
+                            String(id)
+                    );
+
+
+                const previousStatus =
+                    previousOrder?.status ||
+                    'pending';
+
+
+                select.disabled =
+                    true;
+
+
+                try {
+
+                    const { error } =
+                        await supabaseClient.rpc(
+                            'admin_update_order_status',
+                            {
+                                p_order_id: id,
+                                p_status: status,
+                                p_message:
+                                    `Status changed to ${status} from admin dashboard`
+                            }
+                        );
+
+
+                    if (error) {
+                        throw error;
+                    }
+
+
+                    const order =
+                        orders.find(
+                            item =>
+                                String(
+                                    item.id
+                                ) ===
+                                String(id)
+                        );
+
+
+                    if (order) {
+
+                        order.status =
+                            status;
+
+                    }
+
+
+                    updateStatistics();
+
+                    applyFilters();
+
+
+                } catch (error) {
+
+                    console.error(
+                        'Status update failed:',
+                        error
+                    );
+
+
+                    alert(
+                        error.message ||
+                        'Could not update order status.'
+                    );
+
+
+                    select.value =
+                        previousStatus;
+
+                } finally {
+
+                    select.disabled =
+                        false;
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           ROW ACTIONS
+        ====================================================== */
+
+        ordersTableBody.addEventListener(
+            'click',
+            async event => {
+
+                const button =
+                    event.target.closest(
+                        'button[data-action]'
+                    );
+
+
+                if (!button) {
+                    return;
+                }
+
+
+                const action =
+                    button.getAttribute(
+                        'data-action'
+                    );
+
+                const id =
+                    button.getAttribute(
+                        'data-id'
+                    );
+
+
+                const order =
+                    orders.find(
+                        item =>
+                            String(
+                                item.id
+                            ) ===
+                            String(id)
+                    );
+
+
+                if (!order) {
+                    return;
+                }
+
+
+                if (
+                    action ===
+                    'view'
+                ) {
+
+                    openDetail(order);
+
+                    return;
+
+                }
+
+
+                if (
+                    action ===
+                    'delete'
+                ) {
+
+                    await deleteOrder(order);
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           DETAIL MODAL
+        ====================================================== */
+
+        function openDetail(order) {
+
+            detailOrderId.textContent =
+                order.order_id ||
+                '—';
+
+            detailUsername.textContent =
+                order.username ||
+                '—';
+
+            detailEmail.textContent =
+                order.email ||
+                '—';
+
+            detailStatus.textContent =
+                order.status ||
+                'pending';
+
+            detailTotal.textContent =
+                formatEuro(
+                    order.total
+                );
+
+            detailCreated.textContent =
+                formatDate(
+                    order.created_at
+                );
+
+            detailDatabaseId.textContent =
+                order.id ||
+                '—';
+
+
+            const items =
+                normalizeItems(
+                    order.items
+                );
+
+
+            if (
+                items.length === 0
+            ) {
+
+                detailItems.innerHTML = `
+
+                    <div
+                        class="table-message"
+                    >
+                        No item information available.
+                    </div>
+
+                `;
+
+            } else {
+
+                detailItems.innerHTML =
+                    '';
+
+
+                items.forEach(item => {
+
+                    const row =
+                        document.createElement(
+                            'div'
+                        );
+
+                    row.className =
+                        'detail-item';
+
+
+                    const quantity =
+                        Number(
+                            item.quantity
+                        ) || 0;
+
+                    const price =
+                        Number(
+                            item.price
+                        ) || 0;
+
+                    const total =
+                        Number(
+                            item.item_total
+                        ) ||
+                        (
+                            quantity *
+                            price
+                        );
+
+
+                    row.innerHTML = `
+
+                        <div>
+
+                            <strong>
+
+                                ${escapeHtml(
+                                    item.title ||
+                                    'Gift Card'
+                                )}
+
+                            </strong>
+
+                            <small>
+
+                                Quantity:
+                                ${quantity}
+                                ×
+                                ${formatEuro(price)} €
+
+                            </small>
+
+                        </div>
+
+                        <strong>
+
+                            ${formatEuro(total)} €
+
+                        </strong>
+
+                    `;
+
+
+                    detailItems.appendChild(
+                        row
+                    );
+
+                });
+
+            }
+
+
+            detailOverlay.classList.add(
+                'active'
+            );
+
+            document.body.style.overflow =
+                'hidden';
+
+        }
+
+
+        function closeDetailModal() {
+
+            detailOverlay.classList.remove(
+                'active'
+            );
+
+            document.body.style.overflow =
+                '';
+
+        }
+
+
+        closeDetail.addEventListener(
+            'click',
+            closeDetailModal
+        );
+
+
+        detailOverlay.addEventListener(
+            'click',
+            event => {
+
+                if (
+                    event.target ===
+                    detailOverlay
+                ) {
+
+                    closeDetailModal();
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           DELETE ORDER
+        ====================================================== */
+
+        async function deleteOrder(order) {
+
+            const allowed =
+                await isAdminUser();
+
+            if (!allowed) {
+
+                await supabaseClient
+                    .auth
+                    .signOut();
+
+                showLogin();
+
+                denyAccess();
+
+                return;
+
+            }
+
+
+            const confirmed =
+                window.confirm(
+                    `Archive order ${
+                        order.order_id ||
+                        order.id
+                    }? It will remain in the audit history.`
+                );
+
+
+            if (!confirmed) {
+                return;
+            }
+
+
+            try {
+
+                const { error } =
+                    await supabaseClient.rpc(
+                        'admin_update_order_status',
+                        {
+                            p_order_id: order.id,
+                            p_status: 'cancelled',
+                            p_message:
+                                'Order archived from admin dashboard'
+                        }
+                    );
+
+
+                if (error) {
+                    throw error;
+                }
+
+
+                order.status =
+                    'cancelled';
+
+
+                updateStatistics();
+
+                applyFilters();
+
+
+            } catch (error) {
+
+                console.error(
+                    'Archive failed:',
+                    error
+                );
+
+
+                alert(
+                    error.message ||
+                    'Could not archive the order.'
+                );
+
+            }
+
+        }
+
+
+        /* =====================================================
+           REFRESH
+        ====================================================== */
+
+        async function refreshOrders() {
+
+            await loadOrders();
+
+        }
+
+
+        refreshButton.addEventListener(
+            'click',
+            refreshOrders
+        );
+
+
+        manualRefreshButton.addEventListener(
+            'click',
+            refreshOrders
+        );
+
+
+        /* =====================================================
+           ESCAPE KEY
+        ====================================================== */
+
+        document.addEventListener(
+            'keydown',
+            event => {
+
+                if (
+                    event.key ===
+                    'Escape'
+                ) {
+
+                    closeDetailModal();
+
+                }
+
+            }
+        );
+
+
+        /* =====================================================
+           AUTH STATE
+        ====================================================== */
+
+        supabaseClient
+            .auth
+            .onAuthStateChange(
+                async (
+                    event,
+                    session
+                ) => {
+
+                    if (!session) {
+
+                        showLogin();
+
+                        return;
+
+                    }
+
+
+                    if (!(await isAdminUser())) {
+
+                        await supabaseClient
+                            .auth
+                            .signOut();
+
+                        showLogin();
+
+                        denyAccess();
+
+                        return;
+
+                    }
+
+
+                    showAdmin(session);
+
+                }
+            );
+
+
+        /* =====================================================
+           AUTO REFRESH
+        ====================================================== */
+
+        setInterval(
+            async () => {
+
+                try {
+
+                    const allowed =
+                        await isAdminUser();
+
+                    if (!allowed) {
+                        return;
+                    }
+
+                    await loadOrders();
+
+                } catch (error) {
+
+                    console.error(
+                        'Auto refresh failed:',
+                        error
+                    );
+
+                }
+
+            },
+            30000
+        );
+
+
+        /* =====================================================
+           START
+        ====================================================== */
+
+        checkSession();
+
+    </script>
+
+</body>
+
+</html>

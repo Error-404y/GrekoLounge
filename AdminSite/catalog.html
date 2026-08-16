@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Catalog · GrekoLounge Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="catalog.css" />
+  </head>
+  <body>
+    <div class="gate" id="gate">
+      <div class="gate-card">
+        <div class="logo">G</div>
+        <h1>Checking access</h1>
+        <p>Securely verifying your administrator role…</p>
+      </div>
+    </div>
+
+    <main class="app" id="app" hidden>
+      <header class="topbar">
+        <a class="brand" href="admin.html">
+          <span>G</span>
+          Greko<strong>Lounge</strong>
+        </a>
+        <nav>
+          <a href="admin.html">Orders</a>
+          <a class="active" href="catalog.html">Catalog</a>
+          <a href="../index.html">View store ↗</a>
+        </nav>
+        <button class="quiet-button" id="logoutButton">Log out</button>
+      </header>
+
+      <section class="content">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">CATALOG OPERATIONS</p>
+            <h1>Products & pricing</h1>
+            <p>Control every live listing without editing storefront code.</p>
+          </div>
+          <button class="primary-button" id="newProductButton">
+            + New product
+          </button>
+        </div>
+
+        <section class="stats" aria-label="Catalog summary">
+          <article>
+            <span>Active products</span>
+            <strong id="activeStat">—</strong>
+          </article>
+          <article>
+            <span>Brands</span>
+            <strong id="brandStat">—</strong>
+          </article>
+          <article>
+            <span>Catalog value</span>
+            <strong id="valueStat">—</strong>
+          </article>
+          <article>
+            <span>Average price</span>
+            <strong id="averageStat">—</strong>
+          </article>
+        </section>
+
+        <section class="panel">
+          <div class="toolbar">
+            <label class="search">
+              <span>⌕</span>
+              <input
+                id="searchInput"
+                type="search"
+                placeholder="Search title, brand, or value"
+              />
+            </label>
+            <select id="brandFilter" aria-label="Filter by brand">
+              <option value="all">All brands</option>
+            </select>
+            <select id="availabilityFilter" aria-label="Filter by availability">
+              <option value="all">All availability</option>
+              <option value="active">Active</option>
+              <option value="archived">Archived</option>
+            </select>
+            <button class="quiet-button" id="refreshButton">Refresh</button>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Face value</th>
+                  <th>Purchase price</th>
+                  <th>Customer saving</th>
+                  <th>Inventory</th>
+                  <th>Status</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="productRows">
+                <tr>
+                  <td colspan="7" class="table-message">Loading catalog…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <div class="overlay" id="productOverlay" hidden>
+      <section
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+      >
+        <header>
+          <div>
+            <p class="eyebrow">CATALOG ITEM</p>
+            <h2 id="modalTitle">Add product</h2>
+          </div>
+          <button class="close-button" id="closeModal" aria-label="Close">
+            ×
+          </button>
+        </header>
+        <form id="productForm">
+          <input id="productId" type="hidden" />
+          <div class="form-grid">
+            <label>
+              Brand
+              <input
+                id="brandInput"
+                maxlength="60"
+                required
+                placeholder="Amazon"
+              />
+            </label>
+            <label>
+              Display title
+              <input
+                id="titleInput"
+                maxlength="120"
+                required
+                placeholder="Amazon €350"
+              />
+            </label>
+            <label>
+              Face value (€)
+              <input
+                id="valueInput"
+                type="number"
+                min="1"
+                step="0.01"
+                required
+              />
+            </label>
+            <label>
+              Purchase price (€)
+              <input
+                id="priceInput"
+                type="number"
+                min="1"
+                step="0.01"
+                required
+              />
+            </label>
+            <label>
+              Badge
+              <input id="badgeInput" maxlength="40" placeholder="Popular" />
+            </label>
+            <label>
+              Inventory
+              <input
+                id="inventoryInput"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="Unlimited"
+              />
+            </label>
+            <label class="wide">
+              Description
+              <textarea
+                id="descriptionInput"
+                maxlength="500"
+                rows="3"
+              ></textarea>
+            </label>
+            <label>
+              Sort order
+              <input id="sortInput" type="number" step="1" value="100" />
+            </label>
+            <label class="toggle-label">
+              <input id="availableInput" type="checkbox" checked />
+              <span>Visible in storefront</span>
+            </label>
+          </div>
+          <p class="form-error" id="formError"></p>
+          <footer>
+            <button type="button" class="quiet-button" id="cancelModal">
+              Cancel
+            </button>
+            <button type="submit" class="primary-button" id="saveProductButton">
+              Save product
+            </button>
+          </footer>
+        </form>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="catalog.js"></script>
+  </body>
+</html>
