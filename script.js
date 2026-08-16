@@ -143,10 +143,14 @@ document.addEventListener("DOMContentLoaded", () => {
       );
     els.grid.innerHTML = shown.length
       ? shown
-          .map(
-            (p) =>
-              `<article class="product-card"><div class="product-art ${slug(p.brand)}"><span class="product-badge">${p.badge || "Available"}</span><span class="product-brand">${p.brand}</span><strong>${money(p.face_value)}</strong></div><div class="product-info"><p>Digital gift card · Face value</p><div><div><h3>${p.name}</h3><span class="price">${money(p.price)}</span></div><button class="add-button" data-add="${p.id}" aria-label="Add ${p.name} to cart">+</button></div></div></article>`,
-          )
+          .map((p) => {
+            const saving = Math.max(
+              0,
+              Number(p.face_value) - Number(p.price),
+            );
+
+            return `<article class="product-card"><div class="product-art ${slug(p.brand)}"><span class="product-badge">${escapeHtml(p.badge || "Available")}</span><span class="product-brand">${escapeHtml(p.brand)}</span><strong>${money(p.face_value)}</strong></div><div class="product-info"><p>Digital gift card · Face value</p><div><div><h3>${escapeHtml(p.name)}</h3><span class="price">${money(p.price)}</span><span class="product-saving">Save ${money(saving)}</span></div><button class="add-button" data-add="${p.id}" aria-label="Add ${escapeHtml(p.name)} to cart">+</button></div></div></article>`;
+          })
           .join("")
       : '<div class="empty-products">No cards match your search.</div>';
   }

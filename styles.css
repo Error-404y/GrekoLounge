@@ -521,6 +521,18 @@ nav a:hover {
   font: 800 20px Manrope;
   color: var(--green);
 }
+
+.product-saving {
+  display: block;
+  width: max-content;
+  margin-top: 7px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: #17633f;
+  background: #e4f5d1;
+  font-size: 12px;
+  font-weight: 800;
+}
 .add-button {
   width: 44px;
   height: 44px;
